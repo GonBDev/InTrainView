@@ -10,9 +10,50 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_17_024537) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_17_072732) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "chats", force: :cascade do |t|
+    t.bigint "training_id", null: false
+    t.text "summary"
+    t.text "description"
+    t.string "status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["training_id"], name: "index_chats_on_training_id"
+  end
+
+  create_table "grades", force: :cascade do |t|
+    t.bigint "chat_id", null: false
+    t.string "criteria"
+    t.integer "score"
+    t.text "advice"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["chat_id"], name: "index_grades_on_chat_id"
+  end
+
+  create_table "messages", force: :cascade do |t|
+    t.bigint "chat_id", null: false
+    t.string "role"
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["chat_id"], name: "index_messages_on_chat_id"
+  end
+
+  create_table "trainings", force: :cascade do |t|
+    t.string "challenge_type"
+    t.string "target_job"
+    t.string "job_description"
+    t.string "status"
+    t.string "summary"
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_trainings_on_user_id"
+  end
 
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
@@ -25,4 +66,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_17_024537) do
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
+
+  add_foreign_key "chats", "trainings"
+  add_foreign_key "grades", "chats"
+  add_foreign_key "messages", "chats"
+  add_foreign_key "trainings", "users"
 end
