@@ -1,0 +1,21 @@
+<div class="container py-5">
+  <%= link_to "Back to my trainings", trainings_path, class: "btn btn-outline-secondary mb-3" %>
+
+  <h1><%= @training.target_job %></h1>
+
+  <p>
+    <%= @training.challenge_type == "interview" ? "Job interview" : "Salary negotiation" %>
+  </p>
+
+  <% if @training.job_description.present? %>
+    <h2 class="h4">Job description</h2>
+    <%= simple_format @training.job_description %>
+    <%= link_to "Edit training", edit_training_path(@training), class: "btn btn-primary" %>
+
+    <%= button_to "Delete training", training_path(@training),
+    method: :delete,
+    class: "btn btn-outline-danger",
+    form: { data: { turbo_confirm: "Delete this training and its practice history?" } } %>
+
+  <% end %>
+</div>

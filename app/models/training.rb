@@ -5,4 +5,5 @@ class Training < ApplicationRecord
 
   CHALLENGE_TYPES = %w[interview negotiation].freeze
   validates :challenge_type, inclusion: { in: CHALLENGE_TYPES }
+  validates :target_job, presence: true
 end
