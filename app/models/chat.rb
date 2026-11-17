@@ -1,5 +1,5 @@
 class Chat < ApplicationRecord
-  belongs_to :traning
+  belongs_to :training
 
   has_many :messages, dependent: :destroy
   has_many :grades, dependent: :destroy
