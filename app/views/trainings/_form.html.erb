@@ -1,0 +1,13 @@
+<%= simple_form_for training do |f| %>
+  <%= simple_form_for @training do |f| %>
+    <%= f.input :challenge_type,
+        label: "Practice mode",
+        collection: [["Job interview", "interview"],
+                     ["Salary negotiation", "negotiation"]],
+        prompt: "Choose a practice mode" %>
+    <%= f.input :target_job, label: "Target job" %>
+    <%= f.input :job_description, as: :text, required: false %>
+  <%= f.button :submit, submit_label, class: "btn btn-primary" %>
+  <% end %>
+
+<% end %>

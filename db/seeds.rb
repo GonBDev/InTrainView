@@ -10,3 +10,6 @@
 
 
 User.create(email: "user@intrainview.com", password: "123123")
+
+
+Training.create(user_id: 1, challenge_type: "interview", target_job: "Rails Developer", job_description: "Senior", status: "Open"   )

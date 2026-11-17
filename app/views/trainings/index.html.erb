@@ -1,0 +1,19 @@
+<div class="container py-5">
+  <h1>My trainings</h1>
+  <%= link_to "New training", new_training_path, class: "btn btn-primary mb-4" %>
+
+  <% if @trainings.any? %>
+    <ul class="list-group">
+      <% @trainings.each do |training| %>
+        <li class="list-group-item">
+          <strong><%= link_to training.target_job, training_path(training) %></strong>
+          <span class="text-muted">
+            · <%= training.challenge_type == "interview" ? "Job interview" : "Salary negotiation" %>
+          </span>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p>You haven’t created a training yet.</p>
+  <% end %>
+</div>

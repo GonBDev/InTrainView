@@ -1,0 +1,5 @@
+<div class="container py-5">
+  <h1>Edit training</h1>
+  <%= render "form", training: @training, submit_label: "Save changes" %>
+  <%= link_to "Cancel", training_path(@training), class: "btn btn-link mt-2" %>
+</div>

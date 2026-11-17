@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_17_072732) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_17_075648) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -26,7 +26,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_17_072732) do
 
   create_table "grades", force: :cascade do |t|
     t.bigint "chat_id", null: false
-    t.string "criteria"
+    t.string "criterion"
     t.integer "score"
     t.text "advice"
     t.datetime "created_at", null: false
