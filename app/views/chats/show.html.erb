@@ -7,14 +7,20 @@
   <% else %>
     <% @messages.each do |message| %>
       <p>
-        <strong><%= message.role == "user" ? "You" : "Coach" %></strong>
+        <strong><%= message.role == "user" ? "You" : "Interviewer" %></strong>
         <%= message.content %>
       </p>
     <% end %>
   <% end %>
 
-  <%= simple_form_for [@chat, @message] do |f| %>
-  <%= f.input :content, as: :text, label: "Your answer" %>
+<%= simple_form_for [@chat, @message] do |f| %>
+  <%= f.input :content,
+      as: :string,
+      label: "Your answer",
+      placeholder: "Type your answer and press Enter",
+      input_html: { autocomplete: "off" } %>
   <%= f.button :submit, "Send", class: "btn btn-primary" %>
-  <% end %>
+<% end %>
+
+
 </div>
