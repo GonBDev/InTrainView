@@ -1,0 +1,131 @@
+<% content_for :title, "Profile | InTrainView" %>
+
+<%= form_with model: @user, scope: :user, url: profile_path, method: :patch, class: "profile-page",
+    data: { controller: "profile",
+            action: "input->profile#touch change->profile#touch avatar:changed->profile#touch" } do |f| %>
+
+  <header class="profile-head">
+    <h1>Your profile</h1>
+    <p>Everything here is optional. Your coach uses it to ask questions that fit you.</p>
+  </header>
+
+  <div class="profile-grid">
+
+    <%# ---------- Photo and completion ---------- %>
+    <aside class="profile-aside">
+      <div class="profile-avatar" data-controller="avatar" data-profile-field="avatar" data-filled="<%= @user.avatar.attached? %>">
+        <div class="profile-avatar-inner">
+          <% if @user.avatar.attached? %>
+            <%= image_tag @user.avatar, alt: "Your photo", class: "profile-photo", data: { avatar_target: "image" } %>
+          <% else %>
+            <img alt="Your photo" class="profile-photo" data-avatar-target="image" hidden>
+          <% end %>
+          <span class="profile-initial" data-avatar-target="initial" <%= "hidden" if @user.avatar.attached? %>><%= @user.email.first.upcase %></span>
+          <button type="button" class="profile-avatar-btn" data-action="avatar#choose" aria-label="Change photo">Change</button>
+        </div>
+
+        <%= f.file_field :avatar, accept: "image/png,image/jpeg,image/webp,image/gif", class: "visually-hidden",
+            tabindex: "-1", data: { avatar_target: "input", action: "avatar#picked" } %>
+        <%= hidden_field_tag "user[remove_avatar]", "0", id: nil, data: { avatar_target: "flag" } %>
+
+        <div class="profile-photo-actions">
+          <button type="button" class="btn btn-accent btn-sm" data-action="avatar#choose">Upload photo</button>
+          <button type="button" class="btn btn-ghost btn-sm" data-avatar-target="removeButton" data-action="avatar#remove" <%= "hidden" unless @user.avatar.attached? %>>Remove</button>
+        </div>
+        <p class="profile-photo-error" data-avatar-target="error" role="alert" hidden></p>
+      </div>
+
+      <div class="profile-completion">
+        <div class="completion-label">
+          <span>Profile completion</span>
+          <strong data-profile-target="percent"><%= @user.profile_completion %>%</strong>
+        </div>
+        <div class="completion-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="<%= @user.profile_completion %>">
+          <span data-profile-target="bar" style="--value: <%= @user.profile_completion %>"></span>
+        </div>
+        <p class="completion-text">The more you share, the more your practice looks like your real situation.</p>
+      </div>
+    </aside>
+
+    <%# ---------- Form ---------- %>
+    <div class="profile-main">
+      <% if @user.errors.any? %>
+        <div class="alert alert-warning" role="alert">
+          <%= @user.errors.full_messages.to_sentence %>
+        </div>
+      <% end %>
+
+      <section class="profile-card">
+        <h2>About you</h2>
+        <div class="field-grid">
+          <div>
+            <%= f.label :country, "Country", class: "field-label" %>
+            <%= f.select :country, ProfileOptions::COUNTRIES, { include_blank: "Select your country" },
+                class: "form-select", data: { profile_field: true } %>
+          </div>
+          <div>
+            <%= f.label :birthday, "Birthday", class: "field-label" %>
+            <%= f.date_field :birthday, min: "1930-01-01", max: Date.current, class: "form-control",
+                data: { profile_field: true } %>
+          </div>
+        </div>
+      </section>
+
+      <section class="profile-card is-orange">
+        <h2>Your work</h2>
+        <div class="field-grid">
+          <div>
+            <%= f.label :industry, "Industry", class: "field-label" %>
+            <%= f.select :industry, ProfileOptions::INDUSTRIES, { include_blank: "Select your industry" },
+                class: "form-select", data: { profile_field: true } %>
+          </div>
+          <div>
+            <%= f.label :job_title, "Job title", class: "field-label" %>
+            <%= f.text_field :job_title, maxlength: 80, placeholder: "Marketing director", class: "form-control",
+                data: { profile_field: true } %>
+          </div>
+          <fieldset class="pill-group field-wide" data-profile-field="experience">
+            <legend class="field-label">Experience</legend>
+            <% ProfileOptions::EXPERIENCES.each do |option| %>
+              <label class="pill">
+                <%= f.radio_button :experience, option %>
+                <span><%= option %></span>
+              </label>
+            <% end %>
+          </fieldset>
+        </div>
+      </section>
+
+      <section class="profile-card" data-controller="skills" data-skills-max-value="<%= UserProfile::MAX_SKILLS %>">
+        <h2>Skills</h2>
+        <label class="field-label" for="skill_input">Type a skill and press Enter</label>
+        <%= f.hidden_field :skills, data: { skills_target: "hidden", profile_field: true } %>
+        <div class="chip-box">
+          <span data-skills-target="list" class="chip-list"></span>
+          <input type="text" id="skill_input" maxlength="40" autocomplete="off" placeholder="Negotiation"
+                 data-skills-target="input" data-action="keydown->skills#keydown blur->skills#commit">
+        </div>
+        <div class="suggestions" aria-label="Suggested skills">
+          <% ProfileOptions::SUGGESTED_SKILLS.each do |skill| %>
+            <button type="button" class="suggest" data-skills-target="suggestion" data-skill="<%= skill %>" data-action="skills#suggest">+ <%= skill %></button>
+          <% end %>
+        </div>
+      </section>
+
+      <section class="profile-card is-orange">
+        <h2>In your own words</h2>
+        <%= f.label :bio, "Studies, background, what you are looking for", class: "field-label" %>
+        <%= f.text_area :bio, rows: 5, maxlength: 500, class: "form-control",
+            placeholder: "I studied business in Paris, then worked in luxury marketing. I am now preparing for director roles.",
+            data: { profile_field: true, profile_target: "bio" } %>
+        <p class="bio-count"><span data-profile-target="count"><%= @user.bio.to_s.length %></span>/500</p>
+      </section>
+
+      <div class="profile-save" data-profile-target="saveBar">
+        <span class="save-status"><span class="save-dot" aria-hidden="true"></span><span data-profile-target="status">No changes yet</span></span>
+        <%= f.button "Save profile", type: "submit", class: "btn btn-accent btn-lg",
+            data: { controller: "ripple", action: "click->ripple#burst" } %>
+      </div>
+    </div>
+  </div>
+<% end %>
