@@ -1,26 +1,67 @@
-<div class="container py-5">
-  <%= link_to "Back to training", training_path(@chat.training) %>
-  <h1><%= @chat.training.target_job %></h1>
+<% training = @chat.training %>
+<% kind = training.challenge_type == "negotiation" ? "negotiation" : "interview" %>
+<% ai_name = kind == "negotiation" ? "Manager" : "Interviewer" %>
+<% messages = @messages.to_a %>
+<% content_for :title, "#{training.target_job} | InTrainView" %>
 
-  <% if @messages.empty? %>
-    <p>No messages yet.</p>
-  <% else %>
-    <% @messages.each do |message| %>
-      <p>
-        <strong><%= message.role == "user" ? "You" : "Interviewer" %></strong>
-        <%= message.content %>
-      </p>
+<section class="chat-page">
+  <div class="chat-card" data-controller="chat">
+
+    <header class="chat-top">
+      <%= link_to training_path(training), class: "chat-back", aria: { label: "Back to training" } do %>&#8592;<% end %>
+      <div class="chat-top-title">
+        <h1><%= training.target_job %></h1>
+        <span class="chat-badge chat-badge-<%= kind %>"><%= kind == "negotiation" ? "Salary negotiation" : "Job interview" %></span>
+      </div>
+      <span class="chat-count"><%= pluralize(messages.count { |m| m.role == "user" }, "answer") %></span>
+    </header>
+
+    <div class="chat-thread" data-chat-target="thread" aria-live="polite">
+      <% if messages.empty? %>
+        <div class="chat-empty">
+          <%= render "shared/tile_art", kind: kind, css: "chat-empty-art" %>
+          <h2>Start the conversation</h2>
+          <p>Write your first answer, or pick a starter.</p>
+          <div class="chat-chips">
+            <% starters = kind == "negotiation" ? ["I would like to talk about my salary.", "I received an offer and want to discuss it."] : ["Hello, thank you for having me.", "Let me introduce myself in a few sentences."] %>
+            <% starters.each do |text| %>
+              <button type="button" class="chat-chip" data-action="chat#fill" data-text="<%= text %>"><%= text %></button>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <% messages.each_with_index do |message, index| %>
+        <% you = message.role == "user" %>
+        <div class="chat-row chat-row-<%= you ? 'you' : 'ai' %><%= ' is-new' if index == messages.size - 1 %>">
+          <% unless you %><span class="chat-avatar" aria-hidden="true"><%= ai_name.first %></span><% end %>
+          <div class="chat-bubble">
+            <span class="visually-hidden"><%= you ? "You" : ai_name %>:</span>
+            <%= simple_format(h(message.content)) %>
+          </div>
+        </div>
+      <% end %>
+
+      <div class="chat-row chat-row-ai chat-typing" data-chat-target="typing" hidden>
+        <span class="chat-avatar" aria-hidden="true"><%= ai_name.first %></span>
+        <div class="chat-bubble" aria-label="<%= ai_name %> is typing">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+      </div>
+    </div>
+
+    <%= form_with model: [@chat, @message], class: "chat-composer", data: { chat_target: "form", action: "submit->chat#sending" } do |f| %>
+      <% if @message.errors.any? %>
+        <p class="chat-error"><%= @message.errors.full_messages.to_sentence %></p>
+      <% end %>
+      <div class="chat-box">
+        <%= f.text_area :content, rows: 1, placeholder: "Type your answer", "aria-label": "Your answer",
+            data: { chat_target: "input", action: "input->chat#autosize keydown->chat#keydown" } %>
+        <%= f.button type: "submit", class: "chat-send", "aria-label": "Send",
+            data: { chat_target: "send", controller: "ripple", action: "click->ripple#burst" } do %>&#8593;<% end %>
+      </div>
+      <p class="chat-hint">Enter to send. Shift+Enter for a new line.</p>
     <% end %>
-  <% end %>
 
-<%= simple_form_for [@chat, @message] do |f| %>
-  <%= f.input :content,
-      as: :string,
-      label: "Your answer",
-      placeholder: "Type your answer and press Enter",
-      input_html: { autocomplete: "off" } %>
-  <%= f.button :submit, "Send", class: "btn btn-primary" %>
-<% end %>
-
-
-</div>
+  </div>
+</section>
