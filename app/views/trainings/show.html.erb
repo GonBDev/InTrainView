@@ -10,6 +10,9 @@
   <% if @training.job_description.present? %>
     <h2 class="h4">Job description</h2>
     <%= simple_format @training.job_description %>
+
+  <% end %>
+  <div class="container py-5 padding-2">
     <%= link_to "Edit training", edit_training_path(@training), class: "btn btn-primary" %>
 
     <%= button_to "Delete training", training_path(@training),
@@ -17,5 +20,44 @@
     class: "btn btn-outline-danger",
     form: { data: { turbo_confirm: "Delete this training and its practice history?" } } %>
 
+    <%= button_to "Start practice", training_chats_path(@training),
+      method: :post, class: "btn btn-primary" %>
+  </div>
+
+  <section class="mt-4">
+  <h2 class="h4">Practice history</h2>
+
+  <% if @chats.any? %>
+    <ul class="list-group">
+      <% @chats.each do |chat| %>
+
+        <li class="list-group-item d-flex justify-content-between align-items-center gap-3">
+          <div>
+            <%= link_to "Practice ##{chat.id}", chat_path(chat) %>
+            <span class="text-muted ms-2">
+              <%= chat.created_at.strftime("%b %d, %Y at %H:%M") %>
+            </span>
+          </div>
+
+          <div class="d-flex align-items-center gap-3">
+            <span class="text-muted text-nowrap">
+              <%= pluralize(chat.messages.size, "message") %>
+            </span>
+
+            <%= button_to "Delete", chat_path(chat),
+                method: :delete,
+                class: "btn btn-outline-danger btn-sm",
+                form: {
+                  class: "mb-0",
+                  data: { turbo_confirm: "Delete this practice and all its messages and feedback?" }
+                } %>
+          </div>
+        </li>
+
+      <% end %>
+    </ul>
+  <% else %>
+    <p>You haven’t started a practice session for this training yet.</p>
   <% end %>
+</section>
 </div>

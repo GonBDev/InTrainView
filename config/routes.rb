@@ -16,5 +16,16 @@ Rails.application.routes.draw do
   #
   resources :trainings, only: [:index, :show, :new, :create, :edit, :update, :destroy]
 
+  # For chats
+  resources :trainings do
+    resources :chats, only: [:create]
+  end
 
+  resources :chats, only: [:show]
+
+
+  # For messages
+  resources :chats, only: [:show, :destroy] do
+    resources :messages, only: [:create]
+  end
 end

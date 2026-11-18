@@ -1,0 +1,20 @@
+<div class="container py-5">
+  <%= link_to "Back to training", training_path(@chat.training) %>
+  <h1><%= @chat.training.target_job %></h1>
+
+  <% if @messages.empty? %>
+    <p>No messages yet.</p>
+  <% else %>
+    <% @messages.each do |message| %>
+      <p>
+        <strong><%= message.role == "user" ? "You" : "Coach" %></strong>
+        <%= message.content %>
+      </p>
+    <% end %>
+  <% end %>
+
+  <%= simple_form_for [@chat, @message] do |f| %>
+  <%= f.input :content, as: :text, label: "Your answer" %>
+  <%= f.button :submit, "Send", class: "btn btn-primary" %>
+  <% end %>
+</div>
