@@ -183,3 +183,48 @@
     transform: scale(1.06);
   }
 }
+
+
+// Profile photo inside the avatar circle
+.avatar-initial {
+  overflow: hidden;
+  padding: 0;
+
+  .avatar-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+// Account menu
+.navbar-intrain .dropdown-menu {
+  .dropdown-email {
+    margin: 0;
+    padding: .5rem 1.1rem .6rem;
+    font-size: .85rem;
+    color: $muted;
+    border-bottom: 1px solid rgba($slate, .1);
+    max-width: 16rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dropdown-item {
+    font-weight: 500;
+    padding: .55rem 1.1rem;
+    transition: background-color .15s ease, padding-left .15s ease;
+
+    &:hover,
+    &:focus-visible {
+      background: rgba($blue, .08);
+      color: $slate;
+      padding-left: 1.4rem;
+    }
+
+    &.active {
+      background: $blue;
+      color: $white;
+    }
+  }
+}
