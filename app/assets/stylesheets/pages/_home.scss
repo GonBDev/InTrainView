@@ -1,1 +1,477 @@
-// Specific CSS for your home-page
+// Specific CSS for the home page
+
+// ---------- Hero ----------
+.hero {
+  background: $slate;
+  color: $white;
+  padding: 4.5rem 0 6rem;
+  overflow: hidden;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.05fr .95fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.hero-title {
+  color: $white;
+  font-size: clamp(2.5rem, 5.2vw, 4.25rem);
+  line-height: 1.02;
+  letter-spacing: -.03em;
+  margin-bottom: 1.25rem;
+}
+
+.hero-lead {
+  font-size: 1.2rem;
+  line-height: 1.55;
+  max-width: 34rem;
+  color: rgba($white, .82);
+  margin-bottom: 2rem;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .85rem;
+}
+
+// A flat blue block sits behind the session card
+.hero-stage {
+  position: relative;
+  padding: 1rem;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 2rem;
+    right: -.5rem;
+    bottom: -1.5rem;
+    left: 2rem;
+    background: $blue;
+    border-radius: 1.5rem;
+    transform: rotate(2.5deg);
+  }
+}
+
+// Mouse tilt (--mx and --my come from the tilt controller)
+.hero-stage {
+  --mx: 0;
+  --my: 0;
+  perspective: 1200px;
+
+  .session-card {
+    transform: rotateY(calc(var(--mx) * 5deg)) rotateX(calc(var(--my) * -5deg));
+    transition: transform .15s ease-out;
+  }
+
+  &::before {
+    transform: rotate(2.5deg) translate(calc(var(--mx) * -10px), calc(var(--my) * -10px));
+    transition: transform .2s ease-out;
+  }
+}
+
+// ---------- Practice session card (the one animated moment) ----------
+.session-card {
+  position: relative;
+  margin: 0;
+  padding: 1.5rem;
+  background: $white;
+  color: $slate;
+  border-radius: 1.25rem;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, .3);
+}
+
+.session-head {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  font-weight: 700;
+  margin-bottom: 1.1rem;
+
+  .dot {
+    width: .6rem;
+    height: .6rem;
+    border-radius: 50%;
+    background: $orange;
+  }
+}
+
+.messages {
+  display: flex;
+  flex-direction: column;
+  gap: .65rem;
+}
+
+.msg {
+  max-width: 88%;
+  padding: .7rem .95rem;
+  border-radius: 1rem;
+  font-size: .97rem;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.msg-ai {
+  background: $light-gray;
+  border-bottom-left-radius: .25rem;
+}
+
+.msg-you {
+  align-self: flex-end;
+  background: $blue;
+  color: $white;
+  border-bottom-right-radius: .25rem;
+}
+
+.score-panel {
+  margin-top: 1.1rem;
+  padding-top: 1.1rem;
+  border-top: 2px solid $light-gray;
+}
+
+.score-title {
+  font-size: .95rem;
+  font-weight: 700;
+  margin-bottom: .8rem;
+}
+
+.score-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  row-gap: .3rem;
+  margin-bottom: .75rem;
+  font-size: .92rem;
+  font-weight: 500;
+}
+
+.score-bar {
+  grid-column: 1 / -1;
+  height: .5rem;
+  background: $light-gray;
+  border-radius: 99px;
+  overflow: hidden;
+
+  span {
+    display: block;
+    height: 100%;
+    width: calc(var(--score) * 10%);
+    background: $blue;
+    border-radius: inherit;
+    transition: width .9s cubic-bezier(.2, .8, .2, 1) .3s;
+  }
+}
+
+.score-row.is-low .score-bar span {
+  background: $orange;
+}
+
+.score-tip {
+  margin: .25rem 0 0;
+  font-size: .88rem;
+  color: $muted;
+}
+
+// Motion only runs when the Stimulus controller adds .is-ready
+.is-ready {
+  .chat-step {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity .45s ease, transform .45s ease;
+
+    &.is-visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    &:not(.is-visible) .score-bar span {
+      width: 0;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .is-ready .chat-step,
+  .score-bar span {
+    transition: none;
+  }
+}
+
+// ---------- Tiles carousel ----------
+.modes {
+  padding-top: 5rem;
+  padding-bottom: 2rem;
+}
+
+.modes-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  letter-spacing: -.02em;
+  max-width: 24ch;
+  margin-bottom: 0;
+}
+
+.steps .section-title {
+  margin-bottom: 2rem;
+}
+
+.carousel-buttons {
+  display: flex;
+  gap: .5rem;
+}
+
+.carousel-btn {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  border: 2px solid $slate;
+  background: transparent;
+  color: $slate;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color .15s ease, color .15s ease, transform .15s ease;
+
+  &:hover:not(:disabled) {
+    background: $slate;
+    color: $white;
+    transform: scale(1.08);
+  }
+
+  &:disabled {
+    opacity: .3;
+    cursor: default;
+  }
+}
+
+.tiles {
+  display: flex;
+  gap: 1.25rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: .5rem .25rem 1.5rem;
+  margin: 0 -.25rem;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.tile {
+  position: relative;
+  overflow: hidden;
+  flex: 0 0 18.5rem;
+  height: 23rem;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1.5rem;
+  border-radius: 1.5rem;
+  text-decoration: none;
+  transition: transform .3s cubic-bezier(.2, .8, .2, 1), box-shadow .3s ease;
+
+  &:hover,
+  &:focus-visible {
+    transform: translateY(-8px) rotate(-1deg);
+    box-shadow: 0 18px 0 rgba($slate, .12);
+  }
+
+  &:active {
+    transform: translateY(-2px) scale(.98);
+  }
+}
+
+.tile-blue { background: $blue; color: $white; }
+.tile-orange { background: $orange; color: $slate; }
+.tile-slate { background: $slate; color: $white; }
+.tile-light { background: $white; color: $slate; }
+.tile-light .tile-pill { background: $light-gray; }
+
+.tile-pill {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.25rem;
+  padding: .3rem .85rem;
+  border-radius: 99px;
+  background: $white;
+  color: $slate;
+  font-weight: 700;
+  font-size: .85rem;
+  z-index: 2;
+}
+
+.tile-art {
+  position: absolute;
+  top: 3.5rem;
+  left: 0;
+  width: 100%;
+  height: 13rem;
+
+  .shape {
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform .5s cubic-bezier(.2, .8, .2, 1);
+  }
+}
+
+.tile:hover .tile-art,
+.tile:focus-visible .tile-art {
+  .s1 { transform: translate(-8px, 10px) rotate(12deg); }
+  .s2 { transform: translate(10px, -10px) rotate(-10deg) scale(1.06); }
+  .s3 { transform: translate(-6px, -12px) scale(1.12); }
+}
+
+.tile-title {
+  position: relative;
+  z-index: 2;
+  max-width: 11rem;
+  font-family: $headers-font;
+  font-weight: 800;
+  font-size: 1.45rem;
+  line-height: 1.1;
+  letter-spacing: -.01em;
+}
+
+.tile-go {
+  position: absolute;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 2;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  background: $white;
+  color: $slate;
+  font-weight: 800;
+  font-size: 1.2rem;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transform: translateX(-12px);
+  transition: opacity .25s ease, transform .25s ease;
+}
+
+.tile:hover .tile-go,
+.tile:focus-visible .tile-go {
+  opacity: 1;
+  transform: none;
+}
+
+// Touch screens have no hover, so the arrow is always visible
+@media (hover: none) {
+  .tile-go {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+// ---------- Steps (a real sequence, so they are numbered) ----------
+.steps {
+  padding-top: 4rem;
+  padding-bottom: 5rem;
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.5rem;
+}
+
+.step {
+  position: relative;
+
+  h3 {
+    font-size: 1.35rem;
+    letter-spacing: -.01em;
+    margin: 1.1rem 0 .5rem;
+  }
+
+  p {
+    margin: 0;
+    color: $muted;
+    line-height: 1.55;
+    max-width: 24rem;
+  }
+
+  // Line that links one step to the next
+  &:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    top: 1.375rem;
+    left: 3.75rem;
+    right: -1.25rem;
+    height: 2px;
+    background: rgba($slate, .25);
+  }
+}
+
+.step:hover .step-number {
+  background: $orange;
+  color: $slate;
+  transform: scale(1.15) rotate(-8deg);
+}
+
+.step-number {
+  transition: transform .25s cubic-bezier(.3, 1.6, .5, 1), background-color .2s ease, color .2s ease;
+  position: relative;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  background: $slate;
+  color: $white;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+}
+
+// ---------- Closing call to action ----------
+.cta-band {
+  background: $blue;
+  color: $white;
+  padding: 3.5rem 0;
+
+  .cta-inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem 3rem;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  h2 {
+    color: $white;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    letter-spacing: -.02em;
+    margin: 0;
+  }
+}
+
+// ---------- Small screens ----------
+@media (max-width: 991.98px) {
+  .hero {
+    padding: 3rem 0 4.5rem;
+  }
+
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .steps-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .step:not(:last-child)::before {
+    display: none;
+  }
+}

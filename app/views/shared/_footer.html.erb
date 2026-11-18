@@ -1,0 +1,15 @@
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <%= link_to root_path, class: "wordmark" do %>InTrain<span>View</span><% end %>
+
+    <ul class="footer-links">
+      <li><%= link_to "Home", root_path %></li>
+      <% if user_signed_in? %>
+        <li><%= link_to "Trainings", trainings_path %></li>
+      <% else %>
+        <li><%= link_to "Log in", new_user_session_path %></li>
+        <li><%= link_to "Create an account", new_user_registration_path %></li>
+      <% end %>
+    </ul>
+  </div>
+</footer>

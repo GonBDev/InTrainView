@@ -1,25 +1,22 @@
-<h2>Sign up</h2>
+<% content_for :title, "Create an account | InTrainView" %>
 
-<%= simple_form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
-  <%= f.error_notification %>
+<section class="auth">
+  <div class="auth-card">
+    <h1 class="auth-title">Create your account</h1>
+    <p class="auth-lead">Start practicing interviews and salary negotiations.</p>
 
-  <div class="form-inputs">
-    <%= f.input :email,
-                required: true,
-                autofocus: true,
-                input_html: { autocomplete: "email" }%>
-    <%= f.input :password,
-                required: true,
-                hint: ("#{@minimum_password_length} characters minimum" if @minimum_password_length),
-                input_html: { autocomplete: "new-password" } %>
-    <%= f.input :password_confirmation,
-                required: true,
-                input_html: { autocomplete: "new-password" } %>
+    <%= simple_form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
+      <%= f.error_notification %>
+
+      <%= f.input :email, required: true, autofocus: true, input_html: { autocomplete: "email" } %>
+      <%= f.input :password, required: true,
+          hint: ("At least #{@minimum_password_length} characters" if @minimum_password_length),
+          input_html: { autocomplete: "new-password" } %>
+      <%= f.input :password_confirmation, required: true, input_html: { autocomplete: "new-password" } %>
+
+      <%= f.button :submit, "Create my account", class: "btn btn-accent btn-lg w-100 mt-2" %>
+    <% end %>
+
+    <p class="auth-switch">Already have an account? <%= link_to "Log in", new_session_path(resource_name) %></p>
   </div>
-
-  <div class="form-actions">
-    <%= f.button :submit, "Sign up" %>
-  </div>
-<% end %>
-
-<%= render "devise/shared/links" %>
+</section>

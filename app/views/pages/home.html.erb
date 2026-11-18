@@ -1,56 +1,150 @@
 <% content_for :title, "InTrainView | Interview and Salary Practice" %>
 
-<section class="bg-dark text-white py-5">
-  <div class="container py-md-4">
-    <div class="row">
-      <div class="col-lg-8">
-        <h1 class="display-4 fw-bold">Practice for your next role.</h1>
-        <p class="lead">
-          Rehearse job interviews and salary negotiations, then get feedback
-          on what to improve before the real conversation.
-        </p>
+<section class="hero">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <h1 class="hero-title">Practice the interview before the real one.</h1>
+      <p class="hero-lead">
+        Rehearse job interviews and salary negotiations with an AI that plays
+        the other side. Then see a score for each skill and what to improve.
+      </p>
 
-        <% unless user_signed_in? %>
-          <%= link_to "Create an account", new_user_registration_path,
-              class: "btn btn-info btn-lg" %>
+      <div class="hero-actions">
+        <% if user_signed_in? %>
+          <%= link_to "Practice interviewing", new_training_path(challenge_type: "interview"),
+              class: "btn btn-accent btn-lg", data: { controller: "ripple", action: "click->ripple#burst" } %>
+          <%= link_to "Practice negotiating", new_training_path(challenge_type: "negotiation"),
+              class: "btn btn-ghost btn-lg" %>
+        <% else %>
+          <%= link_to "Create an account", new_user_registration_path, class: "btn btn-accent btn-lg", data: { controller: "ripple", action: "click->ripple#burst" } %>
+          <%= link_to "Log in", new_user_session_path, class: "btn btn-ghost btn-lg" %>
         <% end %>
       </div>
+    </div>
+
+    <div class="hero-stage" data-controller="tilt" data-action="mousemove->tilt#move mouseleave->tilt#reset">
+      <figure class="session-card" data-controller="chat-demo" aria-label="Example of a practice session">
+        <div class="session-head">
+          <span class="dot" aria-hidden="true"></span>
+          Mock interview: Rails developer
+        </div>
+
+        <div class="messages">
+          <p class="msg msg-ai chat-step" data-chat-demo-target="step">
+            <span class="visually-hidden">Interviewer:</span>
+            Tell me about a project you are proud of.
+          </p>
+          <p class="msg msg-you chat-step" data-chat-demo-target="step">
+            <span class="visually-hidden">You:</span>
+            I built a booking app with a team of four and led the payments flow.
+          </p>
+          <p class="msg msg-ai chat-step" data-chat-demo-target="step">
+            <span class="visually-hidden">Interviewer:</span>
+            What was the hardest decision you made on it?
+          </p>
+        </div>
+
+        <div class="score-panel chat-step" data-chat-demo-target="step">
+          <p class="score-title">Your scores</p>
+
+          <div class="score-row">
+            <span>Oral skills</span><span>7/10</span>
+            <div class="score-bar" style="--score: 7"><span></span></div>
+          </div>
+          <div class="score-row is-low">
+            <span>Adaptability</span><span>6/10</span>
+            <div class="score-bar" style="--score: 6"><span></span></div>
+          </div>
+          <div class="score-row">
+            <span>Industry knowledge</span><span>8/10</span>
+            <div class="score-bar" style="--score: 8"><span></span></div>
+          </div>
+
+          <p class="score-tip">Next time: link your answers to what the company needs.</p>
+        </div>
+      </figure>
     </div>
   </div>
 </section>
 
-<section class="container py-5" aria-labelledby="practice-modes">
-  <h2 id="practice-modes" class="mb-4">What are you preparing for?</h2>
-
-  <div class="row g-4">
-    <div class="col-md-6">
-      <article class="card h-100 shadow-sm">
-        <div class="card-body p-4">
-          <h3 class="h4">Job interview</h3>
-          <p class="mb-0">
-            Answer questions for your target role and practice explaining
-            what you did and the results you achieved.
-          </p>
-          <%= link_to "Practice interviewing",
-              new_training_path(challenge_type: "interview"),
-              class: "btn btn-primary mt-3" %>
-        </div>
-      </article>
+<section class="modes container" aria-labelledby="modes-title" data-controller="carousel" data-action="resize@window->carousel#update">
+  <div class="modes-head">
+    <h2 id="modes-title" class="section-title">Choose your situation</h2>
+    <div class="carousel-buttons">
+      <button type="button" class="carousel-btn" data-carousel-target="prev" data-action="carousel#prev" aria-label="Previous">&#8592;</button>
+      <button type="button" class="carousel-btn" data-carousel-target="next" data-action="carousel#next" aria-label="Next">&#8594;</button>
     </div>
+  </div>
 
-    <div class="col-md-6">
-      <article class="card h-100 shadow-sm">
-        <div class="card-body p-4">
-          <h3 class="h4">Salary negotiation</h3>
-          <p class="mb-0">
-            Practice making a counteroffer, explaining your target salary,
-            and responding when the hiring manager pushes back.
-          </p>
-          <%= link_to "Practice negotiating",
-              new_training_path(challenge_type: "negotiation"),
-              class: "btn btn-primary mt-3" %>
-        </div>
-      </article>
+  <div class="tiles" data-carousel-target="track" data-action="scroll->carousel#update">
+    <%= link_to new_training_path(challenge_type: "interview"), class: "tile tile-blue", data: { controller: "ripple", action: "click->ripple#burst" } do %>
+      <span class="tile-pill">Job interview</span>
+      <%= render "shared/tile_art", kind: "interview" %>
+      <span class="tile-title">Answer a recruiter's questions</span>
+      <span class="tile-go" aria-hidden="true">&#8594;</span>
+    <% end %>
+
+    <%= link_to new_training_path(challenge_type: "negotiation"), class: "tile tile-orange", data: { controller: "ripple", action: "click->ripple#burst" } do %>
+      <span class="tile-pill">Salary negotiation</span>
+      <%= render "shared/tile_art", kind: "negotiation" %>
+      <span class="tile-title">Negotiate an offer</span>
+      <span class="tile-go" aria-hidden="true">&#8594;</span>
+    <% end %>
+
+    <%= link_to new_training_path(challenge_type: "negotiation"), class: "tile tile-slate", data: { controller: "ripple", action: "click->ripple#burst" } do %>
+      <span class="tile-pill">Ask for a raise</span>
+      <%= render "shared/tile_art", kind: "raise" %>
+      <span class="tile-title">Talk to your manager</span>
+      <span class="tile-go" aria-hidden="true">&#8594;</span>
+    <% end %>
+
+    <%= link_to new_training_path(challenge_type: "interview"), class: "tile tile-light", data: { controller: "ripple", action: "click->ripple#burst" } do %>
+      <span class="tile-pill">New career</span>
+      <%= render "shared/tile_art", kind: "career" %>
+      <span class="tile-title">Interview in a new field</span>
+      <span class="tile-go" aria-hidden="true">&#8594;</span>
+    <% end %>
+  </div>
+</section>
+
+<section class="steps container" aria-labelledby="steps-title">
+  <h2 id="steps-title" class="section-title">How it works</h2>
+
+  <div class="steps-grid">
+    <div class="step">
+      <span class="step-number" aria-hidden="true">1</span>
+      <h3>Tell us about you</h3>
+      <p>
+        Answer a few quick questions about your experience. You can skip this
+        step, but the practice will fit you better if you do it.
+      </p>
     </div>
+    <div class="step">
+      <span class="step-number" aria-hidden="true">2</span>
+      <h3>Practice with the AI</h3>
+      <p>
+        Choose a job interview or a salary negotiation. The AI plays the other
+        side and replies to every answer you give.
+      </p>
+    </div>
+    <div class="step">
+      <span class="step-number" aria-hidden="true">3</span>
+      <h3>Get your scores and advice</h3>
+      <p>
+        See a score for each skill, advice on every score, and a summary of
+        what to work on next.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="container cta-inner">
+    <h2>Start your first practice session.</h2>
+    <% if user_signed_in? %>
+      <%= link_to "New training", new_training_path, class: "btn btn-accent btn-lg", data: { controller: "ripple", action: "click->ripple#burst" } %>
+    <% else %>
+      <%= link_to "Create an account", new_user_registration_path, class: "btn btn-accent btn-lg", data: { controller: "ripple", action: "click->ripple#burst" } %>
+    <% end %>
   </div>
 </section>
