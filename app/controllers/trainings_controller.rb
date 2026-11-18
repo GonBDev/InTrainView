@@ -22,6 +22,7 @@ class TrainingsController < ApplicationController
 
   def show
     @training = current_user.trainings.find(params[:id])
+    @chats = @training.chats.order(created_at: :desc, id: :desc)
   end
 
   def edit
