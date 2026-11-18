@@ -1,12 +1,185 @@
-.navbar-lewagon {
-  justify-content: space-between;
-  background: white;
+.navbar-intrain {
+  background: $slate;
+  padding: .85rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+
+  .navbar-brand {
+    font-size: 1.4rem;
+    margin-right: 2rem;
+  }
+
+  .nav-link {
+    position: relative;
+    color: rgba($white, .8);
+    font-weight: 500;
+    background: none;
+    border: 0;
+    transition: color .15s ease;
+
+    // Orange line that grows from the left on hover
+    &::after {
+      content: "";
+      position: absolute;
+      left: var(--bs-navbar-nav-link-padding-x, .5rem);
+      right: var(--bs-navbar-nav-link-padding-x, .5rem);
+      bottom: .15rem;
+      height: 2px;
+      background: $orange;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .25s ease;
+    }
+
+    &:hover::after,
+    &:focus-visible::after {
+      transform: scaleX(1);
+    }
+
+    &.dropdown-toggle::after {
+      all: unset;
+      display: inline-block;
+      margin-left: .45em;
+      vertical-align: .15em;
+      border-top: .3em solid;
+      border-right: .3em solid transparent;
+      border-left: .3em solid transparent;
+      transition: transform .2s ease;
+    }
+
+    &.dropdown-toggle[aria-expanded="true"]::after {
+      transform: rotate(180deg);
+    }
+
+    &:hover,
+    &:focus-visible {
+      color: $white;
+    }
+
+    &.active {
+      color: $white;
+
+      &::after {
+        transform: scaleX(1);
+      }
+    }
+  }
+
+  .dropdown-menu {
+    border: 0;
+    border-radius: $border-radius-lg;
+    box-shadow: 0 12px 32px rgba($slate, .25);
+  }
+
+  .dropdown-menu.show {
+    animation: menu-in .2s ease-out;
+  }
 }
 
-.navbar-lewagon .navbar-collapse {
-  flex-grow: 0;
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
 }
 
-.navbar-lewagon .navbar-brand img {
+// Practice mega menu
+.mega-menu {
+  right: 0;
+  left: auto;
+  padding: 1rem;
+  width: 36rem;
+  max-width: calc(100vw - 2rem);
+}
+
+.mega-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.mega-tile {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+  padding: 1.1rem;
+  border-radius: 1rem;
+  text-decoration: none;
+  transition: transform .25s cubic-bezier(.2, .8, .2, 1);
+
+  &:hover,
+  &:focus-visible {
+    transform: translateY(-4px) rotate(-1deg);
+  }
+
+}
+
+.mega-blue { background: $blue; color: $white; }
+.mega-orange { background: $orange; color: $slate; }
+.mega-slate { background: $slate; color: $white; }
+.mega-light { background: $white; color: $slate; }
+
+.mega-art {
+  width: 100%;
+  height: 5.5rem;
+  margin-bottom: .25rem;
+
+  .shape {
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform .4s cubic-bezier(.2, .8, .2, 1);
+  }
+}
+
+.mega-tile:hover .mega-art,
+.mega-tile:focus-visible .mega-art {
+  .s1 { transform: translate(-4px, 4px) rotate(6deg); }
+  .s2 { transform: translate(5px, -4px) rotate(-6deg) scale(1.06); }
+  .s3 { transform: translate(-3px, -6px) scale(1.12); }
+}
+
+.mega-title {
+  font-family: $headers-font;
+  font-weight: 800;
+  font-size: 1.15rem;
+}
+
+.mega-text {
+  font-size: .9rem;
+  line-height: 1.35;
+}
+
+// On desktop with a mouse, the menu opens on hover
+@media (hover: hover) and (min-width: 768px) {
+  .mega:hover > .dropdown-menu {
+    display: block;
+    animation: menu-in .2s ease-out;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .mega-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Avatar made from the user's first letter
+.avatar-initial {
   width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: $orange;
+  color: $slate;
+  font-weight: 800;
+  font-size: 1rem;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform .15s ease;
+
+  &:hover {
+    transform: scale(1.06);
+  }
 }

@@ -1,38 +1,66 @@
-<nav class="navbar navbar-expand-sm navbar-light navbar-lewagon">
-  <div class="container-fluid">
-    <%= link_to "/", class: "navbar-brand" do %>
-      <%= image_tag "https://raw.githubusercontent.com/lewagon/fullstack-images/master/uikit/logo.png" %>
-    <% end %>
+<nav class="navbar navbar-expand-md navbar-dark navbar-intrain" aria-label="Main">
+  <div class="container">
+    <%= link_to root_path, class: "navbar-brand wordmark" do %>InTrain<span>View</span><% end %>
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav me-auto">
+      <ul class="navbar-nav ms-auto align-items-md-center gap-md-2">
+
+        <%# Quick start menu: opens on hover (desktop) or on click %>
+        <li class="nav-item dropdown mega">
+          <button type="button" class="nav-link dropdown-toggle" id="quickStartMenu" data-bs-toggle="dropdown" aria-expanded="false">
+            Quick start
+          </button>
+          <div class="dropdown-menu dropdown-menu-end mega-menu" aria-labelledby="quickStartMenu">
+            <div class="mega-grid">
+              <a href="<%= new_training_path(challenge_type: "interview") %>" class="mega-tile mega-blue">
+                <%= render "shared/tile_art", kind: "interview", css: "mega-art" %>
+                <span class="mega-title">Job interview</span>
+                <span class="mega-text">Answer the questions a recruiter would ask.</span>
+              </a>
+              <a href="<%= new_training_path(challenge_type: "negotiation") %>" class="mega-tile mega-orange">
+                <%= render "shared/tile_art", kind: "negotiation", css: "mega-art" %>
+                <span class="mega-title">Salary negotiation</span>
+                <span class="mega-text">Negotiate an offer during hiring.</span>
+              </a>
+              <a href="<%= new_training_path(challenge_type: "negotiation") %>" class="mega-tile mega-slate">
+                <%= render "shared/tile_art", kind: "raise", css: "mega-art" %>
+                <span class="mega-title">Ask for a raise</span>
+                <span class="mega-text">Make your case to your manager.</span>
+              </a>
+              <a href="<%= new_training_path(challenge_type: "interview") %>" class="mega-tile mega-light">
+                <%= render "shared/tile_art", kind: "career", css: "mega-art" %>
+                <span class="mega-title">New career</span>
+                <span class="mega-text">Interview in a field you are entering.</span>
+              </a>
+            </div>
+          </div>
+        </li>
+
         <% if user_signed_in? %>
-          <li class="nav-item active">
-            <%= link_to "Home", "/", class: "nav-link" %>
-          </li>
           <li class="nav-item">
-            <%= link_to "Trainings", "/trainings", class: "nav-link" %>
-          </li>
-          <li class="nav-item">
-            <%= link_to "Inbox", "#", class: "nav-link" %>
+            <%= link_to "My trainings", trainings_path, class: "nav-link #{'active' if controller_name == 'trainings'}" %>
           </li>
           <li class="nav-item dropdown">
-          <a href="#" class="avatar" id="navbarDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <%= image_tag "https://kitt.lewagon.com/placeholder/users/ssaunier", class: "avatar", alt: "dropdown menu" %>
-          </a>
+            <button type="button" class="avatar-initial" id="navbarDropdown" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Account menu">
+              <%= current_user.email.first.upcase %>
+            </button>
             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-              <%= link_to "Profile info", "/profile", class: "dropdown-item" %>
-              <%= link_to "Account settings", "/users/edit", class: "dropdown-item" %>
-              <%= link_to "Log out", destroy_user_session_path, data: {turbo_method: :delete}, class: "dropdown-item" %>
+              <%= link_to "Account settings", edit_user_registration_path, class: "dropdown-item" %>
+              <%= link_to "Log out", destroy_user_session_path, data: { turbo_method: :delete }, class: "dropdown-item" %>
             </div>
           </li>
         <% else %>
           <li class="nav-item">
-            <%= link_to "Login", new_user_session_path, class: "nav-link" %>
+            <%= link_to "Log in", new_user_session_path, class: "nav-link" %>
+          </li>
+          <li class="nav-item ms-md-2">
+            <%= link_to "Create an account", new_user_registration_path,
+                class: "btn btn-accent btn-sm",
+                data: { controller: "ripple", action: "click->ripple#burst" } %>
           </li>
         <% end %>
       </ul>

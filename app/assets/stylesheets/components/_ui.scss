@@ -1,0 +1,161 @@
+// Global UI: layout shell, focus, buttons, forms, lists
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+// Wordmark used in the navbar and the footer
+.wordmark {
+  font-family: $headers-font;
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: -.02em;
+  color: $white;
+  text-decoration: none;
+
+  span {
+    color: $orange;
+  }
+}
+
+// Keyboard focus is always visible
+:focus-visible {
+  outline: 3px solid $orange;
+  outline-offset: 3px;
+}
+
+// Buttons
+.btn {
+  transition: transform .15s ease, background-color .15s ease, border-color .15s ease, color .15s ease;
+
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 rgba($slate, .25);
+  }
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow: none;
+  }
+}
+
+// Click ripple (added by the ripple controller)
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .55);
+  transform: scale(0);
+  pointer-events: none;
+  animation: ripple .6s ease-out forwards;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn:hover,
+  .tile:hover,
+  .tile:focus-visible {
+    transform: none;
+  }
+
+  .tile-art .shape,
+  .tile-go,
+  .hero-stage .session-card {
+    transition: none;
+  }
+}
+
+// Orange call to action (dark text keeps 5.9:1 contrast)
+.btn-accent {
+  --bs-btn-color: #{$slate};
+  --bs-btn-bg: #{$orange};
+  --bs-btn-border-color: #{$orange};
+  --bs-btn-hover-color: #{$slate};
+  --bs-btn-hover-bg: #FB8A3C;
+  --bs-btn-hover-border-color: #FB8A3C;
+  --bs-btn-active-color: #{$slate};
+  --bs-btn-active-bg: #EA580C;
+  --bs-btn-active-border-color: #EA580C;
+}
+
+// Outline button for dark backgrounds
+.btn-ghost {
+  --bs-btn-color: #{$white};
+  --bs-btn-bg: transparent;
+  --bs-btn-border-color: rgba(255, 255, 255, .45);
+  --bs-btn-hover-color: #{$white};
+  --bs-btn-hover-bg: rgba(255, 255, 255, .12);
+  --bs-btn-hover-border-color: #{$white};
+  --bs-btn-active-color: #{$white};
+  --bs-btn-active-bg: rgba(255, 255, 255, .2);
+  --bs-btn-active-border-color: #{$white};
+}
+
+// Solid dark button for the orange panel
+.btn-slate {
+  --bs-btn-color: #{$white};
+  --bs-btn-bg: #{$slate};
+  --bs-btn-border-color: #{$slate};
+  --bs-btn-hover-color: #{$white};
+  --bs-btn-hover-bg: #0F172A;
+  --bs-btn-hover-border-color: #0F172A;
+  --bs-btn-active-color: #{$white};
+  --bs-btn-active-bg: #0F172A;
+  --bs-btn-active-border-color: #0F172A;
+}
+
+// Forms
+.form-control,
+.form-select {
+  &:focus {
+    border-color: $blue;
+    box-shadow: 0 0 0 .25rem rgba($blue, .2);
+  }
+}
+
+// Lists (trainings index)
+.list-group-item {
+  background: $white;
+  border-color: rgba($slate, .12);
+  padding: 1rem 1.25rem;
+  transition: background-color .15s ease;
+
+  &:hover {
+    background: rgba($white, .6);
+  }
+
+  a {
+    text-decoration: none;
+  }
+}
+
+// Flash messages
+.alert.alert-info {
+  background: $blue;
+  border-color: $blue;
+  color: $white;
+
+  .btn-close {
+    filter: invert(1);
+  }
+}
+
+.alert.alert-warning {
+  background: $orange;
+  border-color: $orange;
+  color: $slate;
+}

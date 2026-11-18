@@ -1,0 +1,26 @@
+<%# Illustration for a situation. kind: interview, negotiation, raise or career. Parts .s1 .s2 .s3 move on hover. %>
+<% if kind == "interview" %>
+  <svg class="<%= local_assigns[:css] || 'tile-art' %>" viewBox="0 0 200 160" aria-hidden="true">
+    <g class="shape s1"><path d="M30 20h100a12 12 0 0 1 12 12v46a12 12 0 0 1-12 12H80l-22 20V90H42a12 12 0 0 1-12-12V32a12 12 0 0 1 12-12z" fill="#fff"/><text x="86" y="73" text-anchor="middle" font-size="44" font-weight="800" font-family="Arial, sans-serif" fill="#1D4ED8">?</text></g>
+    <g class="shape s2"><path d="M110 92h58a10 10 0 0 1 10 10v28a10 10 0 0 1-10 10h-8v16l-18-16h-32a10 10 0 0 1-10-10v-28a10 10 0 0 1 10-10z" fill="#F97316"/><circle cx="123" cy="116" r="5" fill="#1E293B"/><circle cx="139" cy="116" r="5" fill="#1E293B"/><circle cx="155" cy="116" r="5" fill="#1E293B"/></g>
+    <g class="shape s3"><circle cx="162" cy="38" r="20" fill="#1E293B"/><path d="M152 38l8 8 14-16" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></g>
+  </svg>
+<% elsif kind == "negotiation" %>
+  <svg class="<%= local_assigns[:css] || 'tile-art' %>" viewBox="0 0 200 160" aria-hidden="true">
+    <g class="shape s1"><ellipse cx="55" cy="130" rx="38" ry="12" fill="#1E293B"/><ellipse cx="55" cy="112" rx="38" ry="12" fill="#334155"/><ellipse cx="55" cy="94" rx="38" ry="12" fill="#1E293B"/><ellipse cx="55" cy="76" rx="38" ry="12" fill="#334155"/></g>
+    <g class="shape s2"><path d="M110 30h62a8 8 0 0 1 8 8v58a8 8 0 0 1-8 8h-62l-24-37z" fill="#fff"/><circle cx="108" cy="67" r="7" fill="#F97316"/><text x="145" y="86" text-anchor="middle" font-size="40" font-weight="800" font-family="Arial, sans-serif" fill="#1E293B">$</text></g>
+    <g class="shape s3"><path d="M105 125h60m0 0l-12-10m12 10l-12 10M165 148h-60m0 0l12-10m-12 10l12 10" fill="none" stroke="#1D4ED8" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" transform="translate(0 -12)"/></g>
+  </svg>
+<% elsif kind == "raise" %>
+  <svg class="<%= local_assigns[:css] || 'tile-art' %>" viewBox="0 0 200 160" aria-hidden="true">
+    <g class="shape s1"><rect x="25" y="105" width="34" height="45" rx="6" fill="#E0E1DD"/><rect x="73" y="80" width="34" height="70" rx="6" fill="#1D4ED8"/><rect x="121" y="50" width="34" height="100" rx="6" fill="#F97316"/></g>
+    <g class="shape s2"><path d="M25 80l45-25 35 15 62-48" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M150 14h24v24" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g class="shape s3"><circle cx="168" cy="108" r="22" fill="#F97316"/><text x="168" y="118" text-anchor="middle" font-size="28" font-weight="800" font-family="Arial, sans-serif" fill="#1E293B">$</text></g>
+  </svg>
+<% elsif kind == "career" %>
+  <svg class="<%= local_assigns[:css] || 'tile-art' %>" viewBox="0 0 200 160" aria-hidden="true">
+    <g class="shape s1"><path d="M70 70V58a10 10 0 0 1 10-10h40a10 10 0 0 1 10 10v12" fill="none" stroke="#1E293B" stroke-width="8"/><rect x="40" y="70" width="110" height="70" rx="12" fill="#1E293B"/><rect x="88" y="94" width="14" height="16" rx="3" fill="#F97316"/></g>
+    <g class="shape s2"><path d="M120 12h46l20 16-20 16h-46z" fill="#1D4ED8"/></g>
+    <g class="shape s3"><circle cx="45" cy="30" r="16" fill="#F97316"/></g>
+  </svg>
+<% end %>
