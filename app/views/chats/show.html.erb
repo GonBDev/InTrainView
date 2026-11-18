@@ -50,18 +50,91 @@
       </div>
     </div>
 
-    <%= form_with model: [@chat, @message], class: "chat-composer", data: { chat_target: "form", action: "submit->chat#sending" } do |f| %>
-      <% if @message.errors.any? %>
-        <p class="chat-error"><%= @message.errors.full_messages.to_sentence %></p>
-      <% end %>
-      <div class="chat-box">
-        <%= f.text_area :content, rows: 1, placeholder: "Type your answer", "aria-label": "Your answer",
-            data: { chat_target: "input", action: "input->chat#autosize keydown->chat#keydown" } %>
-        <%= f.button type: "submit", class: "chat-send", "aria-label": "Send",
-            data: { chat_target: "send", controller: "ripple", action: "click->ripple#burst" } do %>&#8593;<% end %>
-      </div>
-      <p class="chat-hint">Enter to send. Shift+Enter for a new line.</p>
-    <% end %>
+    <% if @chat.status == "completed" %>
+      <p class="p-3 mb-0">This practice session is complete.</p>
 
+        <section class="p-3" aria-labelledby="practice-feedback">
+          <h2 id="practice-feedback" class="h4">Your feedback</h2>
+
+          <% if @chat.grades.exists? %>
+<% grades_by_criterion = @chat.grades.index_by(&:criterion) %>
+<% criteria = Grade::CRITERIA.fetch(@chat.training.challenge_type) %>
+<% scores = criteria.filter_map { |criterion| grades_by_criterion[criterion]&.score } %>
+
+<div class="d-flex align-items-center gap-2 mb-3">
+  <% criteria.each do |criterion| %>
+    <% score = grades_by_criterion[criterion]&.score %>
+    <% color = if score.nil?
+                 "bg-secondary"
+               elsif score < 5
+                 "bg-danger"
+               elsif score < 7
+                 "bg-warning"
+               else
+                 "bg-success"
+               end %>
+    <% description = "#{criterion}: #{score.nil? ? 'Not scored' : "#{score}/10"}" %>
+
+    <span class="d-inline-block rounded-circle border <%= color %>"
+          style="width: 14px; height: 14px;"
+          role="img"
+          aria-label="<%= description %>"
+          title="<%= description %>"></span>
+  <% end %>
+
+  <span class="fw-bold text-nowrap ms-2">
+    <% if scores.any? %>
+      <%= number_with_precision(scores.sum.fdiv(scores.size), precision: 1) %>/10
+    <% else %>
+      Not scored
+    <% end %>
+  </span>
+</div>
+
+
+
+            <% @chat.grades.order(:id).each do |grade| %>
+              <article class="border rounded p-3 mb-3">
+                <h3 class="h5"><%= grade.criterion %></h3>
+
+                <p>
+                  <strong>
+                    <%= grade.score.nil? ? "Insufficient evidence" : "#{grade.score}/10" %>
+                  </strong>
+                </p>
+
+                <%= simple_format(grade.advice) %>
+              </article>
+            <% end %>
+          <% else %>
+            <%= button_to "Generate feedback", chat_path(@chat),
+                method: :patch,
+                class: "btn btn-primary",
+                data: { turbo_submits_with: "Evaluating…" } %>
+          <% end %>
+        </section>
+
+
+    <% else %>
+      <%= button_to "Finish practice", chat_path(@chat),
+        method: :patch,
+        class: "btn btn-outline-primary",
+        form: {
+          data: { turbo_confirm: "Finish this practice session?" }
+      } %>
+
+      <%= form_with model: [@chat, @message], class: "chat-composer", data: { chat_target: "form", action: "submit->chat#sending" } do |f| %>
+        <% if @message.errors.any? %>
+          <p class="chat-error"><%= @message.errors.full_messages.to_sentence %></p>
+        <% end %>
+        <div class="chat-box">
+          <%= f.text_area :content, rows: 1, placeholder: "Type your answer", "aria-label": "Your answer",
+              data: { chat_target: "input", action: "input->chat#autosize keydown->chat#keydown" } %>
+          <%= f.button type: "submit", class: "chat-send", "aria-label": "Send",
+              data: { chat_target: "send", controller: "ripple", action: "click->ripple#burst" } do %>&#8593;<% end %>
+        </div>
+        <p class="chat-hint">Enter to send. Shift+Enter for a new line.</p>
+      <% end %>
+    <% end %>
   </div>
 </section>

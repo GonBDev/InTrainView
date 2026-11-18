@@ -22,11 +22,8 @@ Rails.application.routes.draw do
     resources :chats, only: [:create]
   end
 
-  resources :chats, only: [:show]
-
-
-  # For messages
-  resources :chats, only: [:show, :destroy] do
+  # For messages  .. update is for grading
+  resources :chats, only: [:show, :update, :destroy] do
     resources :messages, only: [:create]
   end
 end
