@@ -37,6 +37,23 @@ class ChatsController < ApplicationController
                 status: :see_other
   end
 
+  def update
+    @chat = current_user.chats.find(params[:id])
+
+    unless @chat.messages.where(role: "user").exists?
+      redirect_to chat_path(@chat),
+                  alert: "Answer at least one question before finishing.",
+                  status: :see_other
+      return
+    end
+
+    @chat.generate_grades!
+
+    redirect_to chat_path(@chat),
+                notice: "Practice completed.",
+                status: :see_other
+  end
+
   private # Makes the following helper available only inside the controller.
 
   def create_opening_message # Generates the coach's opening turn for the new chat.

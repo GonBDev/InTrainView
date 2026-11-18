@@ -1,6 +1,14 @@
 class MessagesController < ApplicationController
   def create
     @chat = current_user.chats.find(params[:chat_id])
+
+    if @chat.status == "completed"
+      redirect_to chat_path(@chat),
+                  alert: "This practice session is already complete.",
+                  status: :see_other
+      return
+    end
+
     @message = @chat.messages.build(message_params)
     @message.role = "user"
 
