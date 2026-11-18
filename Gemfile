@@ -46,8 +46,11 @@ gem "font-awesome-sass", "~> 6.1"
 gem "simple_form", github: "heartcombo/simple_form"
 gem "sassc-rails"
 
-# added by InTrainView team
+# added by InTrainView team to manage users
 gem "devise"
+
+# added by InTrainView team to add llm
+gem "ruby_llm"
 
 group :development, :test do
   gem "dotenv-rails"
