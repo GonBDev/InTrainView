@@ -221,17 +221,9 @@
 
           <p class="chat-hint">Enter to send. Shift+Enter for a new line.</p>
         <% end %>
-        <div class="chat-box">
-          <%= f.text_area :content, rows: 1, placeholder: (time_up ? "Time is up" : paused ? "Paused" : "Type your answer"), "aria-label": "Your answer",
-              disabled: paused || time_up,
-              data: { chat_target: "input", action: "input->chat#autosize keydown->chat#keydown" } %>
-          <%= f.button type: "submit", class: "chat-send", "aria-label": "Send", disabled: paused || time_up,
-              data: { chat_target: "send", controller: "ripple", action: "click->ripple#burst" } do %>&#8593;<% end %>
-        </div>
-        <p class="chat-hint">Enter to send. Shift+Enter for a new line. Press Finish when you are done to get your feedback.</p>
-      <% end %>
-    </div>
-    <% end %>
+       </div> <%# Closes the voice controller wrapper. %>
+    </div> <%# Closes chat-body for an unfinished practice. %>
+    <% end %> <%# Closes the completed/unfinished branch. %>
 
   </div>
 </section>
