@@ -1,4 +1,6 @@
 class Chat < ApplicationRecord
+  include ChatTimer
+
   belongs_to :training
 
   has_many :messages, dependent: :destroy

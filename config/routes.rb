@@ -15,15 +15,16 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   # root "posts#index"
   #
-  resources :trainings, only: [:index, :show, :new, :create, :edit, :update, :destroy]
-
-  # For chats
   resources :trainings do
     resources :chats, only: [:create]
   end
 
-  # For messages  .. update is for grading
+  # For chats. update is Finish (grading). pause and resume stop and restart the timer.
   resources :chats, only: [:show, :update, :destroy] do
+    member do
+      patch :pause
+      patch :resume
+    end
     resources :messages, only: [:create]
     resources :transcriptions, only: [:create]
   end

@@ -9,6 +9,20 @@ class MessagesController < ApplicationController
       return
     end
 
+    if @chat.time_up?
+      redirect_to chat_path(@chat),
+                  alert: "Time is up. Finish the practice to see your feedback.",
+                  status: :see_other
+      return
+    end
+
+    if @chat.paused?
+      redirect_to chat_path(@chat),
+                  alert: "The practice is paused. Resume it to keep going.",
+                  status: :see_other
+      return
+    end
+
     @message = @chat.messages.build(message_params)
     @message.role = "user"
 
