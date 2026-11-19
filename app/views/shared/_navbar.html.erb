@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-md navbar-dark navbar-intrain" aria-label="Main">
   <div class="container">
-    <%= link_to root_path, class: "navbar-brand wordmark" do %>InTrain<span>View</span><% end %>
+    <%= link_to root_path, class: "navbar-brand", aria: { label: "InTrainView, home" } do %><%= render "shared/logo", on: :dark %><% end %>
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>

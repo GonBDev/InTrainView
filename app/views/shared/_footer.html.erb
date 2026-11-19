@@ -1,6 +1,6 @@
 <footer class="site-footer">
   <div class="container footer-inner">
-    <%= link_to root_path, class: "wordmark" do %>InTrain<span>View</span><% end %>
+    <%= link_to root_path, class: "footer-brand", aria: { label: "InTrainView, home" } do %><%= render "shared/logo", on: :dark %><% end %>
 
     <ul class="footer-links">
       <li><%= link_to "Home", root_path %></li>

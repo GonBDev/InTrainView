@@ -1,0 +1,220 @@
+// Practice timer, pause button and pause screen
+
+.chat-top {
+  position: relative;
+  padding-bottom: 1.25rem;
+}
+
+.chat-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .6rem .9rem;
+}
+
+// ---------- Clock ----------
+.chat-timer {
+  --timer: #{$white};
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .35rem .8rem .35rem .65rem;
+  border-radius: 99px;
+  background: rgba($white, .12);
+  color: var(--timer);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  font-size: 1rem;
+  line-height: 1;
+  transition: background-color .3s ease, color .3s ease;
+
+  svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+.chat-top[data-state="warn"] .chat-timer {
+  --timer: #{$orange};
+  background: rgba($orange, .18);
+}
+
+.chat-top[data-state="danger"] .chat-timer,
+.chat-top[data-state="over"] .chat-timer {
+  --timer: #FFB4AE;
+  background: rgba($red, .55);
+  animation: timer-pulse 1s ease-in-out infinite;
+}
+
+.chat-top[data-state="paused"] .chat-timer {
+  --timer: rgba(#{$white}, .65);
+  background: rgba($white, .08);
+}
+
+// Thin bar along the bottom of the header
+.chat-timer-track {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: .3rem;
+  background: rgba($white, .1);
+}
+
+.chat-timer-bar {
+  display: block;
+  height: 100%;
+  background: $blue;
+  transition: width .3s linear, background-color .3s ease;
+}
+
+.chat-top[data-state="warn"] .chat-timer-bar {
+  background: $orange;
+}
+
+.chat-top[data-state="danger"] .chat-timer-bar,
+.chat-top[data-state="over"] .chat-timer-bar {
+  background: #E5483D;
+}
+
+.chat-top[data-state="paused"] .chat-timer-bar {
+  background: rgba($white, .35);
+}
+
+// ---------- Pause button ----------
+.chat-pause {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .5rem 1rem;
+  border: 2px solid rgba($white, .35);
+  border-radius: 99px;
+  background: transparent;
+  color: $white;
+  font-weight: 700;
+  font-size: .9rem;
+  cursor: pointer;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .15s ease;
+
+  svg {
+    width: .9rem;
+    height: .9rem;
+    fill: currentColor;
+  }
+
+  &:hover {
+    border-color: $white;
+    background: rgba($white, .14);
+    transform: translateY(-2px);
+  }
+
+  &.is-resume {
+    border-color: $orange;
+    background: $orange;
+    color: $slate;
+
+    &:hover {
+      background: #FB8A3C;
+    }
+  }
+}
+
+// Time used, in the feedback banner
+.feedback-head .feedback-time {
+  margin-top: .25rem;
+  font-size: .9rem;
+  opacity: .85;
+}
+
+// ---------- Pause screen ----------
+.chat-body {
+  position: relative;
+}
+
+.chat-paused {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba($white, .78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: paused-in .25s ease both;
+}
+
+.chat-paused-card {
+  max-width: 24rem;
+  text-align: center;
+
+  > svg {
+    width: 3.5rem;
+    height: 3.5rem;
+    padding: 1rem;
+    margin-bottom: .75rem;
+    border-radius: 50%;
+    background: $slate;
+    fill: $orange;
+  }
+
+  h2 {
+    margin: 0 0 .4rem;
+    font-size: 1.5rem;
+    color: $slate;
+  }
+
+  p {
+    margin: 0 0 1.25rem;
+    color: $muted;
+  }
+}
+
+.chat-composer .chat-box textarea:disabled {
+  cursor: not-allowed;
+}
+
+@keyframes timer-pulse {
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+@keyframes paused-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .chat-top {
+    padding-bottom: 1.4rem;
+  }
+
+  .chat-tools {
+    flex: 1 0 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-top[data-state="danger"] .chat-timer,
+  .chat-top[data-state="over"] .chat-timer,
+  .chat-paused {
+    animation: none;
+  }
+
+  .chat-timer-bar {
+    transition: none;
+  }
+
+  .chat-pause:hover {
+    transform: none;
+  }
+}

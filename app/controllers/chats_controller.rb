@@ -1,18 +1,11 @@
 class ChatsController < ApplicationController
-  def create
-    @training = current_user.trainings.find(params[:training_id])
-    @chat = @training.chats.create!(status: "in_progress")
-
-    redirect_to chat_path(@chat), status: :see_other
-  end
-
   def create # Handles the request to start a practice session.
     @training = current_user.trainings.find(params[:training_id]) # Finds a training owned by the signed-in user.
 
     @chat = Chat.new(status: "in_progress") # Builds an unsaved chat with its starting status.
     @chat.training = @training # Connects the chat to its training and, through it, its owner.
 
-    if @chat.save # Saves the chat and checks whether its validations passed.
+    if @chat.save # Saves the chat (the 15 minute timer starts here) and checks whether its validations passed.
       create_opening_message # Asks the AI for the first question and saves it.
       redirect_to chat_path(@chat), status: :see_other # Opens the saved chat after the POST request.
     else # Handles a chat that could not be saved.
@@ -37,10 +30,12 @@ class ChatsController < ApplicationController
                 status: :see_other
   end
 
+  # Finish: grades the practice. Also called by the timer when the 15 minutes are over.
   def update
     @chat = current_user.chats.find(params[:id])
 
-    unless @chat.messages.where(role: "user").exists?
+    # When time is up, a practice can be finished even without an answer
+    unless @chat.messages.where(role: "user").exists? || @chat.time_up?
       redirect_to chat_path(@chat),
                   alert: "Answer at least one question before finishing.",
                   status: :see_other
@@ -48,10 +43,26 @@ class ChatsController < ApplicationController
     end
 
     @chat.generate_grades!
+    @chat.stop_timer!
 
     redirect_to chat_path(@chat),
                 notice: "Practice completed.",
                 status: :see_other
+  end
+
+  # Stops the clock, for example in an emergency
+  def pause
+    @chat = current_user.chats.find(params[:id])
+    @chat.pause_timer!
+
+    redirect_to chat_path(@chat), status: :see_other
+  end
+
+  def resume
+    @chat = current_user.chats.find(params[:id])
+    @chat.resume_timer!
+
+    redirect_to chat_path(@chat), status: :see_other
   end
 
   private # Makes the following helper available only inside the controller.
