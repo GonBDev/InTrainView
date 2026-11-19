@@ -1,0 +1,8 @@
+<%# Logo with the right colors for the surface it sits on.
+    on: :dark  for dark surfaces (navbar, footer), the logo has white letters
+    on: :light for light surfaces (cards, white pages), the logo has navy letters %>
+<% on = local_assigns.fetch(:on, :dark) %>
+<%= image_tag "logo-on-#{on}.png",
+      alt: "InTrainView",
+      class: ["brand-logo", "brand-logo-#{on}", local_assigns[:css]].compact.join(" "),
+      width: 1000, height: (on == :dark ? 291 : 313) %>

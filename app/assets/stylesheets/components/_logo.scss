@@ -1,0 +1,52 @@
+// InTrainView logo. Two files: logo-on-dark.png (white letters) and logo-on-light.png (navy letters).
+// Always use the version made for the surface, never the other one.
+
+.brand-logo {
+  display: block;
+  width: auto;
+  max-width: 100%;
+}
+
+// Navbar: the navy part of the dark logo is already lightened so it stays visible on the slate bar
+.navbar-intrain {
+  padding-top: .55rem;
+  padding-bottom: .55rem;
+
+  .navbar-brand {
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+    margin-right: 2rem;
+    transition: transform .2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+
+  .brand-logo {
+    height: 2.9rem;
+  }
+}
+
+.site-footer .brand-logo {
+  height: 2.6rem;
+}
+
+// Log in and sign up cards
+.auth-logo {
+  height: 3.6rem;
+  margin: .25rem auto 1.25rem;
+}
+
+@media (max-width: 575.98px) {
+  .navbar-intrain .brand-logo {
+    height: 2.4rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar-intrain .navbar-brand:hover {
+    transform: none;
+  }
+}
