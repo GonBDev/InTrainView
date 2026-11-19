@@ -5,24 +5,76 @@
 <% answers = messages.count { |m| m.role == "user" } %>
 <% completed = @chat.status == "completed" %>
 <% content_for :title, "#{training.target_job} | InTrainView" %>
+<% content_for :head do %><meta name="turbo-cache-control" content="no-cache"><% end %>
+<% paused = @chat.paused? %>
+<% time_up = @chat.time_up? %>
 
 <section class="chat-page">
   <div class="chat-card<%= ' is-completed' if completed %>" data-controller="chat">
 
-    <header class="chat-top">
+    <header class="chat-top"<% unless completed %> data-controller="timer"
+            data-timer-seconds-value="<%= @chat.seconds_left %>" data-timer-total-value="<%= ChatTimer::LIMIT %>"
+            data-timer-running-value="<%= @chat.timer_running? %>" data-state="<%= timer_state(@chat) %>"<% end %>>
       <%= link_to training_path(training), class: "chat-back", aria: { label: "Back to training" } do %>&#8592;<% end %>
       <div class="chat-top-title">
         <h1><%= training.target_job %></h1>
         <span class="chat-badge chat-badge-<%= kind %>"><%= kind == "negotiation" ? "Salary negotiation" : "Job interview" %></span>
       </div>
-      <span class="chat-count"><%= pluralize(answers, "answer") %></span>
-      <% if !completed && answers > 0 %>
-        <%= button_to "Finish", chat_path(@chat), method: :patch, class: "chat-finish",
-            form: { class: "chat-finish-form",
-                    data: { turbo_confirm: "Finish this practice and get your feedback?" } },
-            data: { turbo_submits_with: "Evaluating..." } %>
+
+      <div class="chat-tools">
+        <span class="chat-count"><%= pluralize(answers, "answer") %></span>
+
+        <% unless completed %>
+          <div class="chat-timer" role="timer" aria-label="Time left">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 2M9.5 2.5h5"></path></svg>
+            <span class="chat-timer-clock" data-timer-target="clock"><%= format_clock(@chat.seconds_left) %></span>
+          </div>
+
+          <% if paused %>
+            <%= button_to resume_chat_path(@chat), method: :patch, class: "chat-pause is-resume",
+                form: { class: "chat-finish-form" }, data: { turbo_submits_with: "..." } do %>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg><span>Resume</span>
+            <% end %>
+          <% elsif !time_up %>
+            <%= button_to pause_chat_path(@chat), method: :patch, class: "chat-pause",
+                form: { class: "chat-finish-form" }, data: { turbo_submits_with: "..." } do %>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"></path></svg><span>Pause</span>
+            <% end %>
+          <% end %>
+
+          <% if !paused && (answers > 0 || time_up) %>
+            <%= button_to "Finish", chat_path(@chat), method: :patch, class: "chat-finish",
+                form: { class: "chat-finish-form",
+                        data: { turbo_confirm: "Finish this practice and get your feedback?" } },
+                data: { turbo_submits_with: "Evaluating..." } %>
+          <% end %>
+
+          <%# Sent by the timer itself when the 15 minutes are over, no question asked %>
+          <%= button_to "Time is up", chat_path(@chat), method: :patch, class: "visually-hidden",
+              form: { hidden: true, data: { timer_target: "finish" } } %>
+        <% end %>
+      </div>
+
+      <% unless completed %>
+        <div class="chat-timer-track" aria-hidden="true">
+          <span class="chat-timer-bar" data-timer-target="bar" style="width: <%= (@chat.seconds_left * 100.0 / ChatTimer::LIMIT).round(2) %>%"></span>
+        </div>
+        <p class="visually-hidden" aria-live="polite" data-timer-target="status"></p>
       <% end %>
     </header>
+
+    <div class="chat-body">
+    <% if paused %>
+      <div class="chat-paused" role="status">
+        <div class="chat-paused-card">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"></path></svg>
+          <h2>Practice paused</h2>
+          <p>The timer is stopped. <%= format_clock(@chat.seconds_left) %> left. The conversation is hidden until you resume.</p>
+          <%= button_to "Resume practice", resume_chat_path(@chat), method: :patch, class: "btn btn-accent btn-lg",
+              form: { class: "inline-form" }, data: { turbo_submits_with: "Resuming..." } %>
+        </div>
+      </div>
+    <% end %>
 
     <div class="chat-thread" data-chat-target="thread" aria-live="polite">
       <% if messages.empty? %>
@@ -59,6 +111,7 @@
     </div>
 
     <% if completed %>
+    </div>
       <% grades = @chat.grades.to_a.sort_by(&:id) %>
       <% average = chat_average(@chat) %>
       <section class="feedback" aria-labelledby="feedback-title">
@@ -66,6 +119,7 @@
           <div>
             <h2 id="feedback-title">Practice complete</h2>
             <p><%= grades.any? ? verdict_for(average) : "Your feedback is not generated yet." %></p>
+            <% if @chat.time_used %><p class="feedback-time">You used <%= format_clock(@chat.time_used) %> of <%= format_clock(ChatTimer::LIMIT) %>.</p><% end %>
           </div>
           <div class="feedback-actions">
             <a href="<%= training_path(training) %>" class="btn btn-ghost">Back to training</a>
@@ -119,13 +173,15 @@
           <p class="chat-error"><%= @message.errors.full_messages.to_sentence %></p>
         <% end %>
         <div class="chat-box">
-          <%= f.text_area :content, rows: 1, placeholder: "Type your answer", "aria-label": "Your answer",
+          <%= f.text_area :content, rows: 1, placeholder: (time_up ? "Time is up" : paused ? "Paused" : "Type your answer"), "aria-label": "Your answer",
+              disabled: paused || time_up,
               data: { chat_target: "input", action: "input->chat#autosize keydown->chat#keydown" } %>
-          <%= f.button type: "submit", class: "chat-send", "aria-label": "Send",
+          <%= f.button type: "submit", class: "chat-send", "aria-label": "Send", disabled: paused || time_up,
               data: { chat_target: "send", controller: "ripple", action: "click->ripple#burst" } do %>&#8593;<% end %>
         </div>
         <p class="chat-hint">Enter to send. Shift+Enter for a new line. Press Finish when you are done to get your feedback.</p>
       <% end %>
+    </div>
     <% end %>
 
   </div>
