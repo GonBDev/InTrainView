@@ -1,0 +1,9 @@
+<%# Typing indicator. The hidden form is sent as soon as it appears (autosubmit controller)
+    and asks RepliesController for the answer. Locals: chat, ai_name %>
+<div id="typing" class="chat-row chat-row-ai chat-typing">
+  <span class="chat-avatar" aria-hidden="true"><%= ai_name.first %></span>
+  <div class="chat-bubble" aria-label="<%= ai_name %> is typing">
+    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+  </div>
+  <%= button_to "Get the reply", chat_reply_path(chat), form: { hidden: true, data: { controller: "autosubmit" } } %>
+</div>

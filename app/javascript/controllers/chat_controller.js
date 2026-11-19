@@ -1,18 +1,29 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Chat window: scroll to the latest message, grow the text box, send with Enter,
-// and show your answer plus a typing indicator right away while the AI replies.
+// Chat window: scrolls to the newest message, grows the text box and sends with Enter.
+// Messages, the typing indicator and the AI reply are added by Turbo Streams,
+// so the page is never reloaded.
 export default class extends Controller {
-  static targets = ["thread", "form", "input", "send", "typing"]
+  static targets = ["thread", "form", "input", "send"]
 
   connect() {
     this.scrollToBottom(false)
 
-    // A finished practice has no text box
-    if (this.hasInputTarget) {
-      this.autosize()
-      this.inputTarget.focus({ preventScroll: true })
-    }
+    // Scroll again each time a message or the typing indicator is added
+    this.observer = new MutationObserver(() => this.scrollToBottom())
+    this.observer.observe(this.threadTarget, { childList: true })
+  }
+
+  disconnect() {
+    if (this.observer) this.observer.disconnect()
+  }
+
+  // Runs each time a text box appears, including the new one that Turbo swaps in after a send
+  inputTargetConnected(input) {
+    if (input.disabled) return
+
+    this.autosize()
+    input.focus({ preventScroll: true })
   }
 
   // Enter sends. Shift+Enter makes a new line. Enter while typing Japanese (IME) is left alone.
@@ -36,38 +47,9 @@ export default class extends Controller {
     this.inputTarget.focus()
   }
 
+  // Nothing is sent for an empty box
   sending(event) {
-    const text = this.inputTarget.value.trim()
-    if (!text) {
-      event.preventDefault()
-      return
-    }
-
-    const empty = this.element.querySelector(".chat-empty")
-    if (empty) empty.remove()
-
-    this.threadTarget.insertBefore(this.bubble(text), this.typingTarget)
-    this.typingTarget.hidden = false
-    this.element.classList.add("is-waiting")
-    this.sendTarget.disabled = true
-    this.scrollToBottom()
-  }
-
-  bubble(text) {
-    const row = document.createElement("div")
-    row.className = "chat-row chat-row-you is-new"
-
-    const bubble = document.createElement("div")
-    bubble.className = "chat-bubble"
-    text.split(/\n{2,}/).forEach((paragraph) => {
-      const p = document.createElement("p")
-      p.textContent = paragraph
-      p.style.whiteSpace = "pre-line"
-      bubble.appendChild(p)
-    })
-
-    row.appendChild(bubble)
-    return row
+    if (!this.inputTarget.value.trim()) event.preventDefault()
   }
 
   scrollToBottom(smooth = true) {

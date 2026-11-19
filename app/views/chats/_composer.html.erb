@@ -1,0 +1,35 @@
+<%# Answer box with the microphone. Locals: chat, message, waiting (true while the AI is answering).
+    The wrapper is what Turbo swaps, so the voice controller starts fresh with each new box. %>
+<% waiting = local_assigns.fetch(:waiting, false) %>
+<% paused = chat.paused? %>
+<% time_up = chat.time_up? %>
+<% disabled = waiting || paused || time_up %>
+<div id="chat_composer" data-controller="voice" data-voice-url-value="<%= chat_transcriptions_path(chat) %>">
+  <%= form_with model: [chat, message], class: "chat-composer",
+      data: { chat_target: "form", action: "submit->chat#sending" } do |f| %>
+    <% if message.errors.any? %>
+      <p class="chat-error"><%= message.errors.full_messages.to_sentence %></p>
+    <% end %>
+
+    <div class="chat-box">
+      <%= f.text_area :content, rows: 1, "aria-label": "Your answer", disabled: disabled,
+          placeholder: (time_up ? "Time is up" : paused ? "Paused" : waiting ? "Waiting for the reply..." : "Type your answer"),
+          data: { chat_target: "input", voice_target: "input", action: "input->chat#autosize keydown->chat#keydown" } %>
+
+      <button type="button" class="chat-send" aria-label="Start recording" aria-pressed="false"
+              title="Start recording" data-voice-target="record stop" data-action="voice#toggle"
+              <%= "disabled" if disabled %>>
+        &#127908;
+      </button>
+
+      <%= f.button type: "submit", class: "chat-send", "aria-label": "Send", disabled: disabled,
+          data: { chat_target: "send", controller: "ripple", action: "click->ripple#burst" } do %>&#8593;<% end %>
+    </div>
+
+    <p data-voice-target="status" role="status" class="chat-hint"></p>
+
+    <audio data-voice-target="playback" controls aria-label="Your recorded answer" hidden></audio>
+
+    <p class="chat-hint">Enter to send. Shift+Enter for a new line. Press Finish when you are done to get your feedback.</p>
+  <% end %>
+</div>

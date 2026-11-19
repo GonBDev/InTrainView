@@ -1,5 +1,6 @@
 class Chat < ApplicationRecord
   include ChatTimer
+  include ChatReply
 
   belongs_to :training
 

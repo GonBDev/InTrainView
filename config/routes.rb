@@ -26,6 +26,7 @@ Rails.application.routes.draw do
       patch :resume
     end
     resources :messages, only: [:create]
+    resource :reply, only: [:create]
     resources :transcriptions, only: [:create]
   end
 end

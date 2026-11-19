@@ -1,6 +1,6 @@
 <% training = @chat.training %>
 <% kind = training.challenge_type == "negotiation" ? "negotiation" : "interview" %>
-<% ai_name = kind == "negotiation" ? "Manager" : "Interviewer" %>
+<% ai_name = ai_name_for(@chat) %>
 <% messages = @messages.to_a %>
 <% answers = messages.count { |m| m.role == "user" } %>
 <% completed = @chat.status == "completed" %>
@@ -22,7 +22,7 @@
       </div>
 
       <div class="chat-tools">
-        <span class="chat-count"><%= pluralize(answers, "answer") %></span>
+        <%= render "chats/count", chat: @chat %>
 
         <% unless completed %>
           <div class="chat-timer" role="timer" aria-label="Time left">
@@ -42,12 +42,7 @@
             <% end %>
           <% end %>
 
-          <% if !paused && (answers > 0 || time_up) %>
-            <%= button_to "Finish", chat_path(@chat), method: :patch, class: "chat-finish",
-                form: { class: "chat-finish-form",
-                        data: { turbo_confirm: "Finish this practice and get your feedback?" } },
-                data: { turbo_submits_with: "Evaluating..." } %>
-          <% end %>
+          <%= render "chats/finish", chat: @chat %>
 
           <%# Sent by the timer itself when the 15 minutes are over, no question asked %>
           <%= button_to "Time is up", chat_path(@chat), method: :patch, class: "visually-hidden",
@@ -76,9 +71,9 @@
       </div>
     <% end %>
 
-    <div class="chat-thread" data-chat-target="thread" aria-live="polite">
+    <div class="chat-thread" id="chat_messages" data-chat-target="thread" aria-live="polite">
       <% if messages.empty? %>
-        <div class="chat-empty">
+        <div class="chat-empty" id="chat_empty">
           <%= render "shared/tile_art", kind: kind, css: "chat-empty-art" %>
           <h2>Start the conversation</h2>
           <p>Write your first answer, or pick a starter.</p>
@@ -92,22 +87,14 @@
       <% end %>
 
       <% messages.each_with_index do |message, index| %>
-        <% you = message.role == "user" %>
-        <div class="chat-row chat-row-<%= you ? 'you' : 'ai' %><%= ' is-new' if index == messages.size - 1 && !completed %>">
-          <% unless you %><span class="chat-avatar" aria-hidden="true"><%= ai_name.first %></span><% end %>
-          <div class="chat-bubble">
-            <span class="visually-hidden"><%= you ? "You" : ai_name %>:</span>
-            <%= simple_format(h(message.content)) %>
-          </div>
-        </div>
+        <%= render "messages/message", message: message, ai_name: ai_name,
+            fresh: (index == messages.size - 1 && !completed) %>
       <% end %>
 
-      <div class="chat-row chat-row-ai chat-typing" data-chat-target="typing" hidden>
-        <span class="chat-avatar" aria-hidden="true"><%= ai_name.first %></span>
-        <div class="chat-bubble" aria-label="<%= ai_name %> is typing">
-          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-        </div>
-      </div>
+      <%# The last message has no answer yet (page reloaded or tab closed): ask for it now %>
+      <% if @chat.reply_pending? %>
+        <%= render "messages/typing", chat: @chat, ai_name: ai_name %>
+      <% end %>
     </div>
 
     <% if completed %>
@@ -168,62 +155,9 @@
         <% end %>
       </section>
     <% else %>
-      <div data-controller="voice"
-          data-voice-url-value="<%= chat_transcriptions_path(@chat) %>">
-
-        <%= form_with model: [@chat, @message],
-            class: "chat-composer",
-            data: { chat_target: "form", action: "submit->chat#sending" } do |f| %>
-
-          <% if @message.errors.any? %>
-            <p class="chat-error"><%= @message.errors.full_messages.to_sentence %></p>
-          <% end %>
-
-          <div class="chat-box">
-            <%= f.text_area :content,
-                rows: 1,
-                placeholder: "Type your answer",
-                "aria-label": "Your answer",
-                data: {
-                  chat_target: "input",
-                  voice_target: "input",
-                  action: "input->chat#autosize keydown->chat#keydown"
-                } %>
-
-            <button type="button"
-                    class="chat-send"
-                    aria-label="Start recording"
-                    aria-pressed="false"
-                    title="Start recording"
-                    data-voice-target="record stop"
-                    data-action="voice#toggle">
-              🎤
-            </button>
-
-            <%= f.button type: "submit",
-                class: "chat-send",
-                "aria-label": "Send",
-                data: {
-                  chat_target: "send",
-                  controller: "ripple",
-                  action: "click->ripple#burst"
-                } do %>
-              &#8593;
-            <% end %>
-          </div>
-
-          <p data-voice-target="status" role="status" class="chat-hint"></p>
-
-          <audio data-voice-target="playback"
-                controls
-                aria-label="Your recorded answer"
-                hidden></audio>
-
-          <p class="chat-hint">Enter to send. Shift+Enter for a new line.</p>
-        <% end %>
-       </div> <%# Closes the voice controller wrapper. %>
-    </div> <%# Closes chat-body for an unfinished practice. %>
-    <% end %> <%# Closes the completed/unfinished branch. %>
+      <%= render "chats/composer", chat: @chat, message: @message || Message.new %>
+    </div>
+    <% end %>
 
   </div>
 </section>

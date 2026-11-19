@@ -1,4 +1,7 @@
 class MessagesController < ApplicationController
+  # Saves the candidate's message. The answer comes in two steps so nothing waits:
+  # this request shows the message and a typing indicator at once, then the indicator
+  # asks RepliesController for the AI answer.
   def create
     @chat = current_user.chats.find(params[:chat_id])
 
@@ -23,15 +26,28 @@ class MessagesController < ApplicationController
       return
     end
 
+    # The previous message has no answer yet: show the page, it waits for the reply
+    if @chat.reply_pending?
+      redirect_to chat_path(@chat), status: :see_other
+      return
+    end
+
     @message = @chat.messages.build(message_params)
     @message.role = "user"
 
     if @message.save
-      create_assistant_message
-      redirect_to chat_path(@chat), status: :see_other
+      respond_to do |format|
+        format.turbo_stream
+        format.html { redirect_to chat_path(@chat), status: :see_other }
+      end
     else
-      @messages = @chat.messages.order(:created_at, :id)
-      render "chats/show", status: :unprocessable_entity
+      respond_to do |format|
+        format.turbo_stream { render :create, status: :unprocessable_entity }
+        format.html do
+          @messages = @chat.messages.order(:created_at, :id)
+          render "chats/show", status: :unprocessable_entity
+        end
+      end
     end
   end
 
@@ -39,21 +55,5 @@ class MessagesController < ApplicationController
 
   def message_params
     params.require(:message).permit(:content)
-  end
-
-  def create_assistant_message
-    rubyllm_chat = RubyLLM.chat(model: "gpt-4.1")
-    rubyllm_chat.with_instructions(Message.system_prompt(@chat.training))
-
-    @chat.messages.where.not(id: @message.id).order(:created_at, :id).each do |message|
-      rubyllm_chat.add_message(role: message.role, content: message.content)
-    end
-
-    response = rubyllm_chat.ask(@message.content)
-
-    @chat.messages.create!(
-      role: "assistant",
-      content: response.content
-    )
   end
 end
