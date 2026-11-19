@@ -1,19 +1,89 @@
-<div class="container py-5">
-  <h1>My trainings</h1>
-  <%= link_to "New training", new_training_path, class: "btn btn-primary mb-4" %>
+<% content_for :title, "My trainings | InTrainView" %>
+<% trainings = @trainings.to_a %>
+<% stats = trainings.map { |training| training_stats(training) } %>
+<% total_practices = stats.sum { |stat| stat[:practices] } %>
+<% averages = stats.filter_map { |stat| stat[:average] } %>
+<% overall = averages.any? ? averages.sum.fdiv(averages.size).round(1) : nil %>
 
-  <% if @trainings.any? %>
-    <ul class="list-group">
-      <% @trainings.each do |training| %>
-        <li class="list-group-item">
-          <strong><%= link_to training.target_job, training_path(training) %></strong>
-          <span class="text-muted">
-            · <%= training.challenge_type == "interview" ? "Job interview" : "Salary negotiation" %>
+<section class="page" data-controller="filter">
+  <header class="page-head">
+    <div>
+      <h1 class="page-title">My trainings</h1>
+      <p class="page-lead">Open a training to practice again, or create a new one.</p>
+    </div>
+    <%= link_to "New training", new_training_path, class: "btn btn-accent btn-lg",
+        data: { controller: "ripple", action: "click->ripple#burst" } %>
+  </header>
+
+  <% if trainings.any? %>
+    <dl class="stat-band">
+      <div>
+        <dt>Trainings</dt>
+        <dd data-controller="countup" data-countup-end-value="<%= trainings.size %>"><%= trainings.size %></dd>
+      </div>
+      <div>
+        <dt>Practices</dt>
+        <dd data-controller="countup" data-countup-end-value="<%= total_practices %>"><%= total_practices %></dd>
+      </div>
+      <div>
+        <dt>Average score</dt>
+        <% if overall %>
+          <dd data-controller="countup" data-countup-end-value="<%= overall %>" data-countup-decimals-value="1"><%= format_score(overall) %></dd>
+        <% else %>
+          <dd class="is-empty">n/a</dd>
+        <% end %>
+      </div>
+    </dl>
+
+    <div class="toolbar">
+      <div class="tabs" role="group" aria-label="Filter by practice mode">
+        <button type="button" class="tab is-active" aria-pressed="true" data-filter-target="tab" data-kind="all" data-action="filter#show">All</button>
+        <button type="button" class="tab" aria-pressed="false" data-filter-target="tab" data-kind="interview" data-action="filter#show">Job interviews</button>
+        <button type="button" class="tab" aria-pressed="false" data-filter-target="tab" data-kind="negotiation" data-action="filter#show">Negotiations</button>
+      </div>
+      <input type="search" class="form-control search" placeholder="Search a job" aria-label="Search a training"
+             data-filter-target="query" data-action="input->filter#search">
+    </div>
+
+    <div class="training-grid">
+      <% trainings.each_with_index do |training, index| %>
+        <% stat = stats[index] %>
+        <% kind = challenge_kind(training.challenge_type) %>
+        <a href="<%= training_path(training) %>" class="t-card t-card-<%= kind %>"
+           data-filter-target="item" data-kind="<%= kind %>" data-title="<%= training.target_job.to_s.downcase %>"
+           style="--i: <%= [index, 8].min %>">
+          <span class="t-card-top">
+            <span class="tile-pill"><%= challenge_label(training.challenge_type) %></span>
+            <%= render "shared/tile_art", kind: kind, css: "t-art" %>
           </span>
-        </li>
+          <span class="t-card-body">
+            <span class="t-title"><%= training.target_job %></span>
+            <span class="t-desc"><%= truncate(training.job_description.to_s, length: 90).presence || "No job description yet" %></span>
+            <span class="t-meta">
+              <span><%= pluralize(stat[:practices], "practice") %></span>
+              <% if stat[:last] %>
+                <span>Last: <%= time_ago_in_words(stat[:last]) %> ago</span>
+              <% end %>
+              <% if stat[:average] %>
+                <span class="score-chip tone-<%= score_tone(stat[:average]) %>"><%= format_score(stat[:average]) %>/10</span>
+              <% end %>
+            </span>
+          </span>
+          <span class="t-go" aria-hidden="true">&#8594;</span>
+        </a>
       <% end %>
-    </ul>
+    </div>
+
+    <p class="no-results" data-filter-target="empty" hidden>No training matches. Try another word or filter.</p>
   <% else %>
-    <p>You haven’t created a training yet.</p>
+    <div class="empty-state">
+      <%= render "shared/tile_art", kind: "career", css: "empty-art" %>
+      <h2>Start with your first training</h2>
+      <p>Choose what you want to practice. You can add the job and its description in the next step.</p>
+      <div class="empty-actions">
+        <%= link_to "Job interview", new_training_path(challenge_type: "interview"), class: "btn btn-primary btn-lg" %>
+        <%= link_to "Salary negotiation", new_training_path(challenge_type: "negotiation"), class: "btn btn-accent btn-lg" %>
+      </div>
+    </div>
   <% end %>
-</div>
+</section>

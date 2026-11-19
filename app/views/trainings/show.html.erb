@@ -1,97 +1,119 @@
-<div class="container py-5">
-  <%= link_to "Back to my trainings", trainings_path, class: "btn btn-outline-secondary mb-3" %>
+<% kind = challenge_kind(@training.challenge_type) %>
+<% chats = @chats.to_a %>
+<% stat = training_stats(@training) %>
+<% graded = chats.select { |chat| chat_average(chat) }.reverse %>
+<% content_for :title, "#{@training.target_job} | InTrainView" %>
 
-  <h1><%= @training.target_job %></h1>
+<section class="page">
+  <a href="<%= trainings_path %>" class="back-link"><span aria-hidden="true">&#8592;</span> My trainings</a>
 
-  <p>
-    <%= @training.challenge_type == "interview" ? "Job interview" : "Salary negotiation" %>
-  </p>
-
-  <% if @training.job_description.present? %>
-    <h2 class="h4">Job description</h2>
-    <%= simple_format @training.job_description %>
-
-  <% end %>
-  <div class="container py-5 padding-2">
-    <%= link_to "Edit training", edit_training_path(@training), class: "btn btn-primary" %>
-
-    <%= button_to "Delete training", training_path(@training),
-    method: :delete,
-    class: "btn btn-outline-danger",
-    form: { data: { turbo_confirm: "Delete this training and its practice history?" } } %>
-
-    <%= button_to "Start practice", training_chats_path(@training),
-      method: :post, class: "btn btn-primary" %>
-  </div>
-
-  <section class="mt-4">
-  <h2 class="h4">Practice history</h2>
-
-  <% if @chats.any? %>
-    <ul class="list-group">
-      <% @chats.each do |chat| %>
-
-        <% grades_by_criterion = chat.grades.index_by(&:criterion) %>
-<% criteria = Grade::CRITERIA.fetch(@training.challenge_type) %>
-<% scores = criteria.filter_map { |criterion| grades_by_criterion[criterion]&.score } %>
-
-<li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-3">
-  <div>
-    <%= link_to "Practice ##{chat.id}", chat_path(chat) %>
-    <span class="text-muted ms-2">
-      <%= chat.created_at.strftime("%b %d, %Y at %H:%M") %>
-    </span>
-  </div>
-
-  <div class="d-flex flex-wrap align-items-center gap-3">
-    <div class="d-flex align-items-center gap-2">
-      <% criteria.each do |criterion| %>
-        <% score = grades_by_criterion[criterion]&.score %>
-        <% color = if score.nil?
-                     "bg-secondary"
-                   elsif score < 5
-                     "bg-danger"
-                   elsif score < 7
-                     "bg-warning"
-                   else
-                     "bg-success"
-                   end %>
-        <% description = "#{criterion}: #{score.nil? ? 'Not scored' : "#{score}/10"}" %>
-
-        <span class="d-inline-block rounded-circle border <%= color %>"
-              style="width: 14px; height: 14px;"
-              role="img"
-              aria-label="<%= description %>"
-              title="<%= description %>"></span>
+  <header class="t-banner t-banner-<%= kind %>">
+    <div class="t-banner-text">
+      <span class="tile-pill"><%= challenge_label(@training.challenge_type) %></span>
+      <h1><%= @training.target_job %></h1>
+      <% if @training.job_description.present? %>
+        <div class="t-banner-desc"><%= simple_format(h(@training.job_description)) %></div>
       <% end %>
 
-      <span class="fw-bold text-nowrap">
-        <% if scores.any? %>
-          <%= number_with_precision(scores.sum.fdiv(scores.size), precision: 1) %>/10
-        <% else %>
-          Not graded
-        <% end %>
-      </span>
+      <div class="t-banner-actions">
+        <%= button_to "Start practice", training_chats_path(@training), method: :post,
+            class: "btn btn-start btn-lg", form: { class: "inline-form" },
+            data: { turbo_submits_with: "Starting..." } %>
+        <%= link_to "Edit", edit_training_path(@training), class: "btn btn-banner btn-lg" %>
+        <%= button_to "Delete", training_path(@training), method: :delete,
+            class: "btn btn-banner-danger btn-lg",
+            form: { class: "inline-form",
+                    data: { turbo_confirm: "Delete this training and its practice history?" } } %>
+      </div>
     </div>
+    <%= render "shared/tile_art", kind: kind, css: "t-banner-art" %>
+  </header>
 
-    <span class="text-muted text-nowrap">
-      <%= pluralize(chat.messages.size, "message") %>
-    </span>
+  <dl class="stat-row">
+    <div>
+      <dt>Practices</dt>
+      <dd><%= stat[:practices] %></dd>
+    </div>
+    <div>
+      <dt>Best score</dt>
+      <dd class="tone-<%= score_tone(stat[:best]) %>"><%= format_score(stat[:best]) %></dd>
+    </div>
+    <div>
+      <dt>Average</dt>
+      <dd class="tone-<%= score_tone(stat[:average]) %>"><%= format_score(stat[:average]) %></dd>
+    </div>
+    <div>
+      <dt>Answers sent</dt>
+      <dd><%= stat[:answers] %></dd>
+    </div>
+  </dl>
 
-    <%= button_to "Delete", chat_path(chat),
-        method: :delete,
-        class: "btn btn-outline-danger btn-sm",
-        form: {
-          class: "mb-0",
-          data: { turbo_confirm: "Delete this practice and all its messages and feedback?" }
-        } %>
-  </div>
-</li>
-
-      <% end %>
-    </ul>
-  <% else %>
-    <p>You haven’t started a practice session for this training yet.</p>
+  <% if graded.size >= 2 %>
+    <section class="trend-card" aria-labelledby="trend-title">
+      <h2 id="trend-title">Your progress</h2>
+      <ol class="trend">
+        <% graded.last(12).each do |chat| %>
+          <% average = chat_average(chat) %>
+          <li class="tone-<%= score_tone(average) %>" style="--h: <%= (average * 10).round %>%"
+              title="Practice #<%= chat.id %>: <%= format_score(average) %>/10">
+            <span class="trend-value"><%= format_score(average) %></span>
+            <span class="trend-bar"></span>
+            <span class="trend-label">#<%= chat.id %></span>
+          </li>
+        <% end %>
+      </ol>
+    </section>
   <% end %>
+
+  <section class="history" aria-labelledby="history-title">
+    <h2 id="history-title">Practice history</h2>
+
+    <% if chats.any? %>
+      <ul class="history-list">
+        <% chats.each_with_index do |chat, index| %>
+          <% scores = chat_scores(chat) %>
+          <% average = chat_average(chat) %>
+          <% done = chat.status == "completed" %>
+          <li class="h-row" style="--i: <%= [index, 8].min %>">
+            <div class="h-main">
+              <%= link_to "Practice ##{chat.id}", chat_path(chat), class: "h-title" %>
+              <span class="h-date"><%= chat.created_at.strftime("%b %d, %Y at %H:%M") %></span>
+              <span class="status <%= done ? 'status-done' : 'status-live' %>"><%= done ? "Completed" : "In progress" %></span>
+            </div>
+
+            <div class="h-bars" role="img" aria-label="Score for each criterion">
+              <% scores.each do |criterion, score| %>
+                <span class="mini tone-<%= score_tone(score) %>" style="--v: <%= score.nil? ? 8 : score * 10 %>%"
+                      title="<%= criterion %>: <%= score.nil? ? 'not scored' : "#{score}/10" %>"></span>
+              <% end %>
+            </div>
+
+            <div class="h-score tone-<%= score_tone(average) %>">
+              <% if average %>
+                <strong><%= format_score(average) %></strong><span>/10</span>
+              <% else %>
+                <span>Not graded</span>
+              <% end %>
+            </div>
+
+            <span class="h-count"><%= pluralize(chat.messages.size, "message") %></span>
+
+            <div class="h-actions">
+              <%= link_to done ? "Open" : "Continue", chat_path(chat), class: "btn btn-slate btn-sm" %>
+              <%= button_to "Delete", chat_path(chat), method: :delete, class: "btn btn-outline-danger btn-sm",
+                  form: { class: "inline-form",
+                          data: { turbo_confirm: "Delete this practice and all its messages and feedback?" } } %>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <div class="empty-state is-small">
+        <p>No practice yet. Your first session takes about ten minutes.</p>
+        <%= button_to "Start your first practice", training_chats_path(@training), method: :post,
+            class: "btn btn-accent btn-lg", form: { class: "inline-form" },
+            data: { turbo_submits_with: "Starting..." } %>
+      </div>
+    <% end %>
+  </section>
 </section>
-</div>

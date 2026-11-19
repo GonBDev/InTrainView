@@ -1,0 +1,88 @@
+// Messages after an action: saved, deleted, error
+
+.toast-flash {
+  position: fixed;
+  top: 5rem;
+  right: 1rem;
+  z-index: 1080;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  max-width: 24rem;
+  padding: .85rem 1rem .85rem 1.1rem;
+  background: $slate;
+  color: $white;
+  border-radius: 1rem;
+  box-shadow: 0 12px 32px rgba($slate, .35);
+  animation: toast-in .4s cubic-bezier(.3, 1.4, .5, 1);
+
+  // Stack when there are two messages
+  & + & {
+    top: 9rem;
+  }
+
+  &.is-leaving {
+    opacity: 0;
+    transform: translateX(1.5rem);
+    transition: opacity .3s ease, transform .3s ease;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(2rem);
+  }
+}
+
+.toast-dot {
+  flex: none;
+  width: .7rem;
+  height: .7rem;
+  border-radius: 50%;
+  background: $blue;
+  box-shadow: 0 0 0 4px rgba($blue, .35);
+}
+
+.toast-warning .toast-dot {
+  background: $orange;
+  box-shadow: 0 0 0 4px rgba($orange, .35);
+}
+
+.toast-text {
+  flex: 1;
+  font-weight: 500;
+}
+
+.toast-close {
+  flex: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 0;
+  border-radius: 50%;
+  background: rgba($white, .12);
+  color: $white;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color .15s ease, transform .15s ease;
+
+  &:hover {
+    background: $orange;
+    color: $slate;
+    transform: rotate(90deg);
+  }
+}
+
+@media (max-width: 575.98px) {
+  .toast-flash {
+    left: 1rem;
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast-flash {
+    animation: none;
+  }
+}

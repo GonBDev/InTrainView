@@ -2,10 +2,12 @@
 <% kind = training.challenge_type == "negotiation" ? "negotiation" : "interview" %>
 <% ai_name = kind == "negotiation" ? "Manager" : "Interviewer" %>
 <% messages = @messages.to_a %>
+<% answers = messages.count { |m| m.role == "user" } %>
+<% completed = @chat.status == "completed" %>
 <% content_for :title, "#{training.target_job} | InTrainView" %>
 
 <section class="chat-page">
-  <div class="chat-card" data-controller="chat">
+  <div class="chat-card<%= ' is-completed' if completed %>" data-controller="chat">
 
     <header class="chat-top">
       <%= link_to training_path(training), class: "chat-back", aria: { label: "Back to training" } do %>&#8592;<% end %>
@@ -13,7 +15,13 @@
         <h1><%= training.target_job %></h1>
         <span class="chat-badge chat-badge-<%= kind %>"><%= kind == "negotiation" ? "Salary negotiation" : "Job interview" %></span>
       </div>
-      <span class="chat-count"><%= pluralize(messages.count { |m| m.role == "user" }, "answer") %></span>
+      <span class="chat-count"><%= pluralize(answers, "answer") %></span>
+      <% if !completed && answers > 0 %>
+        <%= button_to "Finish", chat_path(@chat), method: :patch, class: "chat-finish",
+            form: { class: "chat-finish-form",
+                    data: { turbo_confirm: "Finish this practice and get your feedback?" } },
+            data: { turbo_submits_with: "Evaluating..." } %>
+      <% end %>
     </header>
 
     <div class="chat-thread" data-chat-target="thread" aria-live="polite">
@@ -33,7 +41,7 @@
 
       <% messages.each_with_index do |message, index| %>
         <% you = message.role == "user" %>
-        <div class="chat-row chat-row-<%= you ? 'you' : 'ai' %><%= ' is-new' if index == messages.size - 1 %>">
+        <div class="chat-row chat-row-<%= you ? 'you' : 'ai' %><%= ' is-new' if index == messages.size - 1 && !completed %>">
           <% unless you %><span class="chat-avatar" aria-hidden="true"><%= ai_name.first %></span><% end %>
           <div class="chat-bubble">
             <span class="visually-hidden"><%= you ? "You" : ai_name %>:</span>
@@ -50,79 +58,62 @@
       </div>
     </div>
 
-    <% if @chat.status == "completed" %>
-      <p class="p-3 mb-0">This practice session is complete.</p>
+    <% if completed %>
+      <% grades = @chat.grades.to_a.sort_by(&:id) %>
+      <% average = chat_average(@chat) %>
+      <section class="feedback" aria-labelledby="feedback-title">
+        <div class="feedback-head">
+          <div>
+            <h2 id="feedback-title">Practice complete</h2>
+            <p><%= grades.any? ? verdict_for(average) : "Your feedback is not generated yet." %></p>
+          </div>
+          <div class="feedback-actions">
+            <a href="<%= training_path(training) %>" class="btn btn-ghost">Back to training</a>
+            <%= button_to "Practice again", training_chats_path(training), method: :post,
+                class: "btn btn-accent", form: { class: "inline-form" },
+                data: { turbo_submits_with: "Starting..." } %>
+          </div>
+        </div>
 
-        <section class="p-3" aria-labelledby="practice-feedback">
-          <h2 id="practice-feedback" class="h4">Your feedback</h2>
+        <% if grades.any? %>
+          <div class="feedback-body">
+            <div class="score-ring tone-<%= score_tone(average) %>" style="--score: <%= average || 0 %>">
+              <svg viewBox="0 0 120 120" aria-hidden="true">
+                <circle class="ring-bg" cx="60" cy="60" r="52" pathLength="100"></circle>
+                <circle class="ring-fg" cx="60" cy="60" r="52" pathLength="100"></circle>
+              </svg>
+              <div class="ring-text">
+                <% if average %>
+                  <strong data-controller="countup" data-countup-end-value="<%= average %>" data-countup-decimals-value="1"><%= format_score(average) %></strong>
+                  <span>out of 10</span>
+                <% else %>
+                  <strong>n/a</strong>
+                <% end %>
+              </div>
+            </div>
 
-          <% if @chat.grades.exists? %>
-<% grades_by_criterion = @chat.grades.index_by(&:criterion) %>
-<% criteria = Grade::CRITERIA.fetch(@chat.training.challenge_type) %>
-<% scores = criteria.filter_map { |criterion| grades_by_criterion[criterion]&.score } %>
-
-<div class="d-flex align-items-center gap-2 mb-3">
-  <% criteria.each do |criterion| %>
-    <% score = grades_by_criterion[criterion]&.score %>
-    <% color = if score.nil?
-                 "bg-secondary"
-               elsif score < 5
-                 "bg-danger"
-               elsif score < 7
-                 "bg-warning"
-               else
-                 "bg-success"
-               end %>
-    <% description = "#{criterion}: #{score.nil? ? 'Not scored' : "#{score}/10"}" %>
-
-    <span class="d-inline-block rounded-circle border <%= color %>"
-          style="width: 14px; height: 14px;"
-          role="img"
-          aria-label="<%= description %>"
-          title="<%= description %>"></span>
-  <% end %>
-
-  <span class="fw-bold text-nowrap ms-2">
-    <% if scores.any? %>
-      <%= number_with_precision(scores.sum.fdiv(scores.size), precision: 1) %>/10
+            <ul class="criteria">
+              <% grades.each_with_index do |grade, index| %>
+                <li class="criterion tone-<%= score_tone(grade.score) %>" style="--i: <%= index %>; --v: <%= grade.score.nil? ? 0 : grade.score * 10 %>%">
+                  <div class="criterion-head">
+                    <h3><%= grade.criterion %></h3>
+                    <span class="criterion-score"><%= grade.score.nil? ? "Not enough evidence" : "#{grade.score}/10" %></span>
+                  </div>
+                  <div class="criterion-bar"><span></span></div>
+                  <%= simple_format(h(grade.advice), class: "criterion-advice") %>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        <% else %>
+          <div class="feedback-empty">
+            <%= button_to "Generate feedback", chat_path(@chat), method: :patch,
+                class: "btn btn-accent btn-lg", form: { class: "inline-form" },
+                data: { turbo_submits_with: "Evaluating..." } %>
+          </div>
+        <% end %>
+      </section>
     <% else %>
-      Not scored
-    <% end %>
-  </span>
-</div>
-
-
-
-            <% @chat.grades.order(:id).each do |grade| %>
-              <article class="border rounded p-3 mb-3">
-                <h3 class="h5"><%= grade.criterion %></h3>
-
-                <p>
-                  <strong>
-                    <%= grade.score.nil? ? "Insufficient evidence" : "#{grade.score}/10" %>
-                  </strong>
-                </p>
-
-                <%= simple_format(grade.advice) %>
-              </article>
-            <% end %>
-          <% else %>
-            <%= button_to "Generate feedback", chat_path(@chat),
-                method: :patch,
-                class: "btn btn-primary",
-                data: { turbo_submits_with: "Evaluating…" } %>
-          <% end %>
-        </section>
-
-
-    <% else %>
-      <%= button_to "Finish practice", chat_path(@chat),
-        method: :patch,
-        class: "btn btn-outline-primary",
-        form: {
-          data: { turbo_confirm: "Finish this practice session?" }
-      } %>
-
       <%= form_with model: [@chat, @message], class: "chat-composer", data: { chat_target: "form", action: "submit->chat#sending" } do |f| %>
         <% if @message.errors.any? %>
           <p class="chat-error"><%= @message.errors.full_messages.to_sentence %></p>
@@ -133,8 +124,9 @@
           <%= f.button type: "submit", class: "chat-send", "aria-label": "Send",
               data: { chat_target: "send", controller: "ripple", action: "click->ripple#burst" } do %>&#8593;<% end %>
         </div>
-        <p class="chat-hint">Enter to send. Shift+Enter for a new line.</p>
+        <p class="chat-hint">Enter to send. Shift+Enter for a new line. Press Finish when you are done to get your feedback.</p>
       <% end %>
     <% end %>
+
   </div>
 </section>

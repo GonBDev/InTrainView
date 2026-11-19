@@ -1,4 +1,9 @@
-<div class="container py-5">
-  <h1>New training</h1>
-  <%= render "form", training: @training, submit_label: "Create training" %>
-</div>
+<% content_for :title, "New training | InTrainView" %>
+
+<section class="page page-narrow">
+  <a href="<%= trainings_path %>" class="back-link"><span aria-hidden="true">&#8592;</span> My trainings</a>
+  <h1 class="page-title">New training</h1>
+  <p class="page-lead">Tell the coach what you are preparing for.</p>
+
+  <%= render "form", training: @training, submit_label: "Create training", cancel_path: trainings_path %>
+</section>

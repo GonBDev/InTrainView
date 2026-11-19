@@ -107,9 +107,16 @@
 .profile-photo-actions {
   position: relative;
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: .6rem;
   margin-top: 1.1rem;
+
+  // Keep each label on one line: "Remove" was cut in the narrow card
+  .btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
 }
 
 .profile-photo-error {
