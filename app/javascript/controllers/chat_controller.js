@@ -7,8 +7,12 @@ export default class extends Controller {
 
   connect() {
     this.scrollToBottom(false)
-    this.autosize()
-    this.inputTarget.focus({ preventScroll: true })
+
+    // A finished practice has no text box
+    if (this.hasInputTarget) {
+      this.autosize()
+      this.inputTarget.focus({ preventScroll: true })
+    }
   }
 
   // Enter sends. Shift+Enter makes a new line. Enter while typing Japanese (IME) is left alone.

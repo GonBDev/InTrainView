@@ -1,13 +1,54 @@
-<%= simple_form_for training do |f| %>
-  <%= simple_form_for @training do |f| %>
-    <%= f.input :challenge_type,
-        label: "Practice mode",
-        collection: [["Job interview", "interview"],
-                     ["Salary negotiation", "negotiation"]],
-        prompt: "Choose a practice mode" %>
-    <%= f.input :target_job, label: "Target job" %>
-    <%= f.input :job_description, as: :text, required: false %>
-  <%= f.button :submit, submit_label, class: "btn btn-primary" %>
+<% suggestions = [current_user.try(:job_title).presence, "Marketing manager", "Software developer", "Sales representative", "Product designer"].compact.uniq.first(5) %>
+<% modes = [["interview", "Job interview", "Answer the questions a recruiter would ask."],
+            ["negotiation", "Salary negotiation", "Defend your request with a hiring manager."]] %>
+
+<%= form_with model: training, class: "t-form", data: { controller: "training-form" } do |f| %>
+  <% if training.errors.any? %>
+    <div class="alert alert-warning" role="alert"><%= training.errors.full_messages.to_sentence %></div>
   <% end %>
 
+  <fieldset class="mode-picker">
+    <legend class="field-label">Practice mode</legend>
+    <div class="mode-options">
+      <% modes.each do |value, label, text| %>
+        <label class="mode-tile mode-tile-<%= value %>">
+          <%= f.radio_button :challenge_type, value %>
+          <span class="mode-card">
+            <%= render "shared/tile_art", kind: value, css: "mode-art" %>
+            <span class="mode-name"><%= label %></span>
+            <span class="mode-text"><%= text %></span>
+            <span class="mode-check" aria-hidden="true">&#10003;</span>
+          </span>
+        </label>
+      <% end %>
+    </div>
+  </fieldset>
+
+  <div class="t-field">
+    <%= f.label :target_job, "Target job", class: "field-label" %>
+    <%= f.text_field :target_job, class: "form-control", placeholder: "Marketing director", maxlength: 80,
+        data: { training_form_target: "job" } %>
+    <div class="suggestions" aria-label="Examples">
+      <% suggestions.each do |text| %>
+        <button type="button" class="suggest" data-action="training-form#fill" data-text="<%= text %>"><%= text %></button>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="t-field">
+    <%= f.label :job_description, "Job description", class: "field-label" %>
+    <%= f.text_area :job_description, rows: 6, class: "form-control",
+        placeholder: "Paste the job posting, or describe the role in a few lines.",
+        data: { training_form_target: "description", action: "input->training-form#count" } %>
+    <p class="field-hint">
+      <span>The coach reads this to ask questions that fit the job. Optional.</span>
+      <span><span data-training-form-target="count">0</span> characters</span>
+    </p>
+  </div>
+
+  <div class="form-actions">
+    <%= f.button submit_label, type: "submit", class: "btn btn-accent btn-lg",
+        data: { controller: "ripple", action: "click->ripple#burst" } %>
+    <%= link_to "Cancel", cancel_path, class: "cancel-link" %>
+  </div>
 <% end %>

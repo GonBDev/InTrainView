@@ -1,12 +1,10 @@
-<% if notice %>
-  <div class="alert alert-info alert-dismissible fade show m-1" role="alert">
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    <%= notice %>
-  </div>
-<% end %>
-<% if alert %>
-  <div class="alert alert-warning alert-dismissible fade show m-1" role="alert">
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    <%= alert %>
-  </div>
+<%# Messages after an action (saved, deleted, error). They close by themselves. %>
+<% { notice: "success", alert: "warning" }.each do |type, tone| %>
+  <% if flash[type].present? %>
+    <div class="toast-flash toast-<%= tone %>" role="<%= tone == 'warning' ? 'alert' : 'status' %>" data-controller="toast">
+      <span class="toast-dot" aria-hidden="true"></span>
+      <span class="toast-text"><%= flash[type] %></span>
+      <button type="button" class="toast-close" aria-label="Close" data-action="toast#close">&times;</button>
+    </div>
+  <% end %>
 <% end %>

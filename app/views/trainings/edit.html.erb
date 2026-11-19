@@ -1,5 +1,9 @@
-<div class="container py-5">
-  <h1>Edit training</h1>
-  <%= render "form", training: @training, submit_label: "Save changes" %>
-  <%= link_to "Cancel", training_path(@training), class: "btn btn-link mt-2" %>
-</div>
+<% content_for :title, "Edit training | InTrainView" %>
+
+<section class="page page-narrow">
+  <a href="<%= training_path(@training) %>" class="back-link"><span aria-hidden="true">&#8592;</span> <%= @training.target_job %></a>
+  <h1 class="page-title">Edit training</h1>
+  <p class="page-lead">Changes apply to your next practice.</p>
+
+  <%= render "form", training: @training, submit_label: "Save changes", cancel_path: training_path(@training) %>
+</section>
