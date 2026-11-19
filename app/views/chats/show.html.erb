@@ -114,18 +114,72 @@
         <% end %>
       </section>
     <% else %>
-      <%= form_with model: [@chat, @message], class: "chat-composer", data: { chat_target: "form", action: "submit->chat#sending" } do |f| %>
-        <% if @message.errors.any? %>
-          <p class="chat-error"><%= @message.errors.full_messages.to_sentence %></p>
+      <div data-controller="voice"
+          data-voice-url-value="<%= chat_transcriptions_path(@chat) %>">
+
+        <%= form_with model: [@chat, @message],
+            class: "chat-composer",
+            data: { chat_target: "form", action: "submit->chat#sending" } do |f| %>
+
+          <% if @message.errors.any? %>
+            <p class="chat-error"><%= @message.errors.full_messages.to_sentence %></p>
+          <% end %>
+
+          <div class="chat-box">
+            <%= f.text_area :content,
+                rows: 1,
+                placeholder: "Type your answer",
+                "aria-label": "Your answer",
+                data: {
+                  chat_target: "input",
+                  voice_target: "input",
+                  action: "input->chat#autosize keydown->chat#keydown"
+                } %>
+
+            <button type="button"
+                    class="chat-send"
+                    aria-label="Start recording"
+                    aria-pressed="false"
+                    title="Start recording"
+                    data-voice-target="record stop"
+                    data-action="voice#toggle">
+              🎤
+            </button>
+
+            <%= f.button type: "submit",
+                class: "chat-send",
+                "aria-label": "Send",
+                data: {
+                  chat_target: "send",
+                  controller: "ripple",
+                  action: "click->ripple#burst"
+                } do %>
+              &#8593;
+            <% end %>
+          </div>
+
+          <p data-voice-target="status" role="status" class="chat-hint"></p>
+
+          <audio data-voice-target="playback"
+                controls
+                aria-label="Your recorded answer"
+                hidden></audio>
+
+          <p class="chat-hint">Enter to send. Shift+Enter for a new line.</p>
         <% end %>
-        <div class="chat-box">
-          <%= f.text_area :content, rows: 1, placeholder: "Type your answer", "aria-label": "Your answer",
-              data: { chat_target: "input", action: "input->chat#autosize keydown->chat#keydown" } %>
-          <%= f.button type: "submit", class: "chat-send", "aria-label": "Send",
-              data: { chat_target: "send", controller: "ripple", action: "click->ripple#burst" } do %>&#8593;<% end %>
+      </div>
+
+      <% if answers > 0 %>
+        <div class="p-3">
+          <%= button_to "Finish practice", chat_path(@chat),
+              method: :patch,
+              class: "btn btn-outline-primary",
+              form: {
+                data: { turbo_confirm: "Finish this practice and get your feedback?" }
+              },
+              data: { turbo_submits_with: "Evaluating…" } %>
         </div>
-        <p class="chat-hint">Enter to send. Shift+Enter for a new line. Press Finish when you are done to get your feedback.</p>
-      <% end %>
+      <% end %>s the text form-->
     <% end %>
 
   </div>
