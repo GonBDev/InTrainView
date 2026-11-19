@@ -1,0 +1,9 @@
+<%# Shown when the AI could not answer. Locals: chat, ai_name %>
+<div id="reply_error" class="chat-row chat-row-ai chat-failed is-new" role="alert">
+  <span class="chat-avatar" aria-hidden="true"><%= ai_name.first %></span>
+  <div class="chat-bubble">
+    <p>The <%= ai_name.downcase %> could not answer. Your message is saved.</p>
+    <%= button_to "Try again", chat_reply_path(chat), class: "btn btn-accent btn-sm",
+        form: { class: "inline-form" }, data: { turbo_submits_with: "Trying..." } %>
+  </div>
+</div>

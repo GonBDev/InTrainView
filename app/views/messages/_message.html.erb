@@ -1,0 +1,10 @@
+<%# One chat bubble, used by the page and by the Turbo Stream answers.
+    Locals: message, ai_name, fresh (true plays the pop animation) %>
+<% you = message.role == "user" %>
+<div id="<%= dom_id(message) %>" class="chat-row chat-row-<%= you ? 'you' : 'ai' %><%= ' is-new' if local_assigns[:fresh] %>">
+  <% unless you %><span class="chat-avatar" aria-hidden="true"><%= ai_name.first %></span><% end %>
+  <div class="chat-bubble">
+    <span class="visually-hidden"><%= you ? "You" : ai_name %>:</span>
+    <%= simple_format(h(message.content)) %>
+  </div>
+</div>

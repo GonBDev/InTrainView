@@ -1,0 +1,11 @@
+<% ai_name = ai_name_for(@chat) %>
+<% if @message.persisted? %>
+  <%= turbo_stream.remove "chat_empty" %>
+  <%= turbo_stream.append "chat_messages", partial: "messages/message", locals: { message: @message, ai_name: ai_name, fresh: true } %>
+  <%= turbo_stream.append "chat_messages", partial: "messages/typing", locals: { chat: @chat, ai_name: ai_name } %>
+  <%= turbo_stream.replace "chat_composer", partial: "chats/composer", locals: { chat: @chat, message: Message.new, waiting: true } %>
+  <%= turbo_stream.replace "chat_count", partial: "chats/count", locals: { chat: @chat } %>
+  <%= turbo_stream.replace "chat_finish", partial: "chats/finish", locals: { chat: @chat } %>
+<% else %>
+  <%= turbo_stream.replace "chat_composer", partial: "chats/composer", locals: { chat: @chat, message: @message } %>
+<% end %>

@@ -1,0 +1,9 @@
+<%# Finish button, shown once there is an answer (or when time is up). Local: chat %>
+<span id="chat_finish" class="chat-finish-slot">
+  <% if chat.in_progress? && !chat.paused? && (chat.time_up? || chat.messages.where(role: "user").exists?) %>
+    <%= button_to "Finish", chat_path(chat), method: :patch, class: "chat-finish",
+        form: { class: "chat-finish-form",
+                data: { turbo_confirm: "Finish this practice and get your feedback?" } },
+        data: { turbo_submits_with: "Evaluating..." } %>
+  <% end %>
+</span>

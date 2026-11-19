@@ -1,4 +1,9 @@
 module ChatsHelper
+  # Name of the AI character, shown on its messages
+  def ai_name_for(chat)
+    chat.training.challenge_type == "negotiation" ? "Manager" : "Interviewer"
+  end
+
   # 905 -> "15:05"
   def format_clock(seconds)
     seconds = seconds.to_i

@@ -183,6 +183,23 @@
   }
 }
 
+// The AI could not answer: the message stays, with a button to ask again
+.chat-failed .chat-bubble {
+  border: 2px solid rgba($red, .35);
+  background: rgba($red, .06);
+
+  p {
+    margin: 0 0 .6rem;
+    color: $red;
+    font-weight: 600;
+  }
+}
+
+// Keeps the Finish button in the header row when Turbo swaps it
+.chat-finish-slot {
+  display: contents;
+}
+
 @keyframes typing-bounce {
   0%, 60%, 100% { transform: translateY(0); opacity: .5; }
   30% { transform: translateY(-.35rem); opacity: 1; }
@@ -340,4 +357,9 @@
   .chat-send:hover:not(:disabled) {
     transform: none;
   }
+}
+
+// Turbo's blue bar looks like a page load while the AI answers, the typing dots already show it
+html:has(.chat-card) .turbo-progress-bar {
+  display: none;
 }

@@ -1,0 +1,4 @@
+<%= turbo_stream.remove "typing" %>
+<%= turbo_stream.remove "reply_error" %>
+<%= turbo_stream.append "chat_messages", partial: "messages/message", locals: { message: @reply, ai_name: ai_name_for(@chat), fresh: true } %>
+<%= turbo_stream.replace "chat_composer", partial: "chats/composer", locals: { chat: @chat, message: Message.new } %>
