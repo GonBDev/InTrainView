@@ -376,6 +376,7 @@
   }
 
   .tile-pill {
+    position: static;
     display: inline-block;
     padding: .25rem .85rem;
     border-radius: 99px;
@@ -388,12 +389,33 @@
 
 .t-banner-desc {
   max-width: 38rem;
+  max-height: unquote("min(14rem, 40vh)");
   margin-bottom: 1.5rem;
+  padding-right: .75rem;
   line-height: 1.55;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba($white, .6) transparent;
 
   p {
     margin-bottom: .6rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
+
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 4px;
+    border-radius: .25rem;
+  }
+}
+
+.t-banner-negotiation .t-banner-desc {
+  scrollbar-color: rgba($slate, .5) transparent;
 }
 
 .t-banner-art {

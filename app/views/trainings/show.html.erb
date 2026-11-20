@@ -12,7 +12,7 @@
       <span class="tile-pill"><%= challenge_label(@training.challenge_type) %></span>
       <h1><%= @training.target_job %></h1>
       <% if @training.job_description.present? %>
-        <div class="t-banner-desc"><%= simple_format(h(@training.job_description)) %></div>
+        <div class="t-banner-desc" tabindex="0" role="region" aria-label="Job description"><%= simple_format(h(@training.job_description)) %></div>
       <% end %>
 
       <div class="t-banner-actions">

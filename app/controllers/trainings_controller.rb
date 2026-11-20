@@ -10,7 +10,7 @@ class TrainingsController < ApplicationController
     @training.status = "draft"
 
     if @training.save
-      redirect_to trainings_path, notice: "Training created.", status: :see_other
+      redirect_to training_path(@training), notice: "Training created.", status: :see_other
     else
       render :new, status: :unprocessable_entity
     end
