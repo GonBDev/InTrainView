@@ -186,6 +186,9 @@ export default class extends Controller {
 
       // Let the user choose when to submit the reviewed answer.
       this.statusTarget.textContent = "Review your answer, then press Send."
+
+      // Announce that transcription has finished and the text box is filled.
+      this.dispatch("transcribed")
     } catch (error) {
       // Avoid updating controls after the user has left the page.
       if (!this.element.isConnected) return
@@ -193,6 +196,10 @@ export default class extends Controller {
       // Display an upload, server, or empty-transcription error.
       this.statusTarget.textContent =
         `Could not transcribe. ${error.message}`
+
+        this.dispatch("transcription-error", {
+          detail: { message: this.statusTarget.textContent }
+        })
     } finally {
       if (this.element.isConnected) {
         // Restore the microphone after transcription succeeds or fails.

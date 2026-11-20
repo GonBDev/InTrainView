@@ -10,7 +10,12 @@
 <% time_up = @chat.time_up? %>
 
 <section class="chat-page">
-  <div class="chat-card<%= ' is-completed' if completed %>" data-controller="chat">
+  <div class="chat-card<%= ' is-completed' if completed %>"
+     data-controller="chat talkback"
+     data-action="submit->talkback#stop
+             turbo:before-cache@document->talkback#stop
+             voice:transcribed->talkback#submitTurn
+             voice:transcription-error->talkback#transcriptionFailed">
 
     <header class="chat-top"<% unless completed %> data-controller="timer"
             data-timer-seconds-value="<%= @chat.seconds_left %>" data-timer-total-value="<%= ChatTimer::LIMIT %>"
@@ -23,6 +28,18 @@
 
       <div class="chat-tools">
         <%= render "chats/count", chat: @chat %>
+
+        <% unless completed %>
+          <label class="d-flex align-items-center gap-2">
+            <input type="checkbox"
+                  data-talkback-target="toggle"
+                  data-action="change->talkback#change"
+                  <%= "disabled" if paused || time_up %>>
+            Voice mode
+          </label>
+
+          <span data-talkback-target="status" role="status"></span>
+        <% end %>
 
         <% unless completed %>
           <div class="chat-timer" role="timer" aria-label="Time left">
