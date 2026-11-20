@@ -5,8 +5,30 @@
 <% time_up = chat.time_up? %>
 <% disabled = waiting || paused || time_up %>
 <div id="chat_composer" data-controller="voice" data-voice-url-value="<%= chat_transcriptions_path(chat) %>">
-  <%= form_with model: [chat, message], class: "chat-composer",
-      data: { chat_target: "form", action: "submit->chat#sending" } do |f| %>
+<div data-talkback-target="voiceControls" class="p-3" hidden>
+  <button type="button"
+          class="btn btn-primary"
+          data-talkback-target="endTurn"
+          data-action="talkback#endTurn"
+          disabled>
+    End turn
+  </button>
+
+  <button type="button"
+          class="btn btn-outline-primary"
+          data-action="talkback#changeMode">
+    Change mode
+  </button>
+</div>
+<%= form_with(
+      model: [chat, message],
+      class: "chat-composer",
+      data: {
+        chat_target: "form",
+        talkback_target: "textMode",
+        action: "submit->chat#sending"
+      }
+    ) do |f| %>
     <% if message.errors.any? %>
       <p class="chat-error"><%= message.errors.full_messages.to_sentence %></p>
     <% end %>
